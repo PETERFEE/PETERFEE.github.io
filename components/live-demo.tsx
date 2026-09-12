@@ -64,14 +64,24 @@ export function LiveDemo({ src, title, hint, repo }: LiveDemoProps) {
         <span>
           {live ? "Drag to rotate · scroll to zoom · type to change the message" : "Interactive — runs in the page"}
         </span>
-        <a
-          href={repo}
-          target="_blank"
-          rel="noreferrer"
-          className="text-chalk-dim underline-offset-4 transition-colors hover:text-chalk hover:underline"
-        >
-          Source on GitHub ↗
-        </a>
+        <span className="flex flex-wrap items-center gap-x-5 gap-y-1">
+          <a
+            href={resolved}
+            target="_blank"
+            rel="noreferrer"
+            className="text-chalk-dim underline-offset-4 transition-colors hover:text-chalk hover:underline"
+          >
+            Open full screen ↗
+          </a>
+          <a
+            href={repo}
+            target="_blank"
+            rel="noreferrer"
+            className="text-chalk-dim underline-offset-4 transition-colors hover:text-chalk hover:underline"
+          >
+            Source on GitHub ↗
+          </a>
+        </span>
       </figcaption>
     </figure>
   );
