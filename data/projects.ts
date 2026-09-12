@@ -542,6 +542,71 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: "the-beauty-and-math",
+    title: "The Beauty and Math",
+    tagline: "A parametric heart, drawn from 2,500 particles of whatever you type",
+    category: "Graphics / WebGL",
+    year: "2026",
+    repo: "https://github.com/PETERFEE/The-Beauty-and-Math",
+    demoEmbed: "https://peterfee.github.io/The-Beauty-and-Math/",
+    accent: "amber",
+    featured: false,
+    summary:
+      "A closed-form heart curve turned into a 3D particle cloud in Three.js, where every particle is a glyph of the message you type. Drag to spin it, scroll to zoom, and the whole cloud breathes on a slow sine. It is the one project here whose correctness criterion is whether it looks right.",
+    features: [
+      {
+        title: "The curve, in closed form",
+        detail:
+          "x = 16 sin³t, y = 13 cos t − 5 cos 2t − 2 cos 3t − cos 4t. Sweeping t around the full turn traces the outline exactly; there is no mesh and no modelling — the shape falls out of the equation.",
+      },
+      {
+        title: "From 2D curve to 3D volume",
+        detail:
+          "A second parameter φ lifts the flat curve into a solid: z = 8 sin φ (1 − 0.3r), where r is the normalised radius. Points near the outer edge get pushed less, which is what rounds the lobes instead of extruding a flat cutout.",
+      },
+      {
+        title: "Text as the particle",
+        detail:
+          "Each character of the message is rasterised to its own texture and used as a point material, so the cloud is literally built out of the words rather than out of dots. Roughly 2,500 particles fill the volume.",
+      },
+      {
+        title: "Motion that isn't distracting",
+        detail:
+          "Particle sizes pulse on a slow sine so the cloud breathes, drag carries inertial momentum rather than snapping, and fog plus lighting give the depth cues a flat point cloud otherwise loses.",
+      },
+      {
+        title: "Easter eggs",
+        detail:
+          "The palette shifts for certain inputs, and typing LUCY sets off five seconds of fireworks.",
+      },
+    ],
+    metrics: [
+      { value: "~2,500", label: "Particles in the cloud" },
+      { value: "4", label: "Cosine terms in the curve" },
+      { value: "60 fps", label: "Target frame rate" },
+      { value: "1", label: "Self-contained HTML file" },
+    ],
+    stack: ["Three.js r128", "WebGL", "JavaScript", "Parametric geometry", "Canvas textures"],
+    media: [
+      {
+        file: "heart.png",
+        kind: "screenshot",
+        hint: "Screenshot of the heart rendered with your own message",
+        alt: "The 3D particle heart rendered from text",
+        caption: "The cloud, rendered from text glyphs.",
+        aspect: "16 / 10",
+        lead: true,
+      },
+      {
+        file: "fireworks.png",
+        kind: "screenshot",
+        hint: "The LUCY fireworks easter egg mid-burst",
+        alt: "The fireworks easter egg",
+        aspect: "16 / 9",
+      },
+    ],
+  },
+  {
     slug: "regression-sim",
     title: "Regression Sim",
     tagline: "A Python harness for running simulation regressions",

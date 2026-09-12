@@ -7,6 +7,7 @@ import { EASE, useReducedMotion } from "@/components/motion";
 import { accentTheme } from "@/components/project-media";
 import type { GalleryItem } from "@/data/gallery";
 import type { Accent } from "@/types/project";
+import { withBasePath } from "@/lib/paths";
 
 function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
@@ -314,7 +315,7 @@ export function GalleryTile({ item, index }: GalleryTileProps): ReactElement {
 
   return (
     <motion.a
-      href={item.href}
+      href={item.internal ? withBasePath(item.href) : item.href}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
       aria-label={label}

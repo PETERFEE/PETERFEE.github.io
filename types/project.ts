@@ -37,6 +37,11 @@ export interface Project {
   origin?: string;
   repo: string;
   demo?: string;
+  /**
+   * Path under /public to a self-contained HTML demo. When set, the project's
+   * dedicated page embeds it live in an iframe.
+   */
+  demoEmbed?: string;
   summary: string;
   features: ProjectFeature[];
   metrics?: ProjectMetric[];
