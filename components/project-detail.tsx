@@ -45,7 +45,12 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
         {hasStage && project.demoEmbed ? (
           <>
-            <DemoStage src={project.demoEmbed} title={project.title} repo={project.repo} />
+            <DemoStage
+              src={project.demoEmbed}
+              title={project.title}
+              repo={project.repo}
+              detailsId={project.slug}
+            />
             <div className="shell pt-4">
               <BackLink />
             </div>
