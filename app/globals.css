@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --shell-pad: clamp(1.25rem, 4vw, 3rem);
+    /* Consumed by tailwind.config.ts fontFamily. Fallbacks are listed there too,
+       so the page still looks right if the webfont never arrives. */
+    --font-sans: "Inter";
+    --font-mono: "JetBrains Mono";
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-chalk font-sans antialiased;
+    /* prevent any horizontal scroll from parallax transforms */
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-signal/30 text-chalk;
+  }
+
+  /* Thin, dark scrollbar so it doesn't break the black canvas */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #050506; }
+  ::-webkit-scrollbar-thumb { background: #26262d; border-radius: 999px; border: 2px solid #050506; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a44; }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-signal ring-offset-2 ring-offset-ink-950 rounded-sm;
+  }
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-shell;
+    padding-inline: var(--shell-pad);
+  }
+
+  /* Small uppercase section label, e.g. "01 / VERIFICATION" */
+  .eyebrow {
+    @apply font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-chalk-faint;
+  }
+
+  .hairline {
+    @apply border-t border-ink-700;
+  }
+
+  /* Frosted card used for project media + spec blocks */
+  .glass {
+    @apply rounded-2xl border border-ink-600/70 bg-ink-850/60 backdrop-blur-xl;
+  }
+
+  /* Text that fades from dim to bright as it scrolls in (Apple hero trick) */
+  .gradient-text {
+    @apply bg-gradient-to-b from-chalk via-chalk to-chalk-faint bg-clip-text text-transparent;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Buttons. Three tiers: brand, glass, quiet.                        */
+  /* ---------------------------------------------------------------- */
+
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full
+           px-6 py-3 text-sm font-medium transition-all duration-500 ease-apple-out
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-soft
+           focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950;
+  }
+
+  /* Gradient fill + a sheen that sweeps across on hover. */
+  .btn-brand {
+    @apply btn text-white shadow-lg shadow-violet/20;
+    background-image: linear-gradient(110deg, #8b5cf6 0%, #6366f1 45%, #06b6d4 100%);
+    background-size: 200% 100%;
+  }
+  .btn-brand:hover {
+    background-position: 100% 50%;
+    box-shadow: 0 10px 40px -10px rgba(139, 92, 246, 0.55);
+    transform: translateY(-2px);
+  }
+  .btn-brand:active { transform: translateY(0); }
+  .btn-brand::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0;
+    background-image: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.28) 50%, transparent 65%);
+    transform: translateX(-120%);
+  }
+  .btn-brand:hover::after { animation: sheen 1.1s ease-out; }
+
+  /* Frosted, with a gradient hairline that lights up on hover. */
+  .btn-glass {
+    @apply btn border border-ink-600 bg-ink-800/50 text-chalk backdrop-blur-xl;
+  }
+  .btn-glass:hover {
+    @apply border-transparent;
+    background-image:
+      linear-gradient(#18181b, #18181b),
+      linear-gradient(110deg, #8b5cf6, #06b6d4);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    transform: translateY(-2px);
+  }
+  .btn-glass:active { transform: translateY(0); }
+
+  .btn-quiet {
+    @apply btn border border-transparent bg-transparent text-chalk-dim hover:text-chalk;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Decoration                                                        */
+  /* ---------------------------------------------------------------- */
+
+  /* A card whose 1px border is a gradient. Two backgrounds, two clips. */
+  .grad-border {
+    border: 1px solid transparent;
+    background-image:
+      linear-gradient(#131317, #131317),
+      linear-gradient(140deg, rgba(139,92,246,0.55), rgba(6,182,212,0.35), rgba(63,63,70,0.4));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .brand-text {
+    background-image: linear-gradient(110deg, #a78bfa 0%, #818cf8 45%, #22d3ee 100%);
+    @apply bg-clip-text text-transparent;
+  }
+
+  /* Small uppercase chip used for tags and categories. */
+  .chip {
+    @apply inline-flex items-center rounded-full border border-ink-600 px-3 py-1
+           font-mono text-[0.6875rem] tracking-wide text-chalk-dim
+           transition-colors duration-300 hover:border-violet/50 hover:text-chalk;
+  }
+}
+
+
+@layer utilities {
+  .blueprint-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  }
+
+  .mask-fade-edges {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+}
+
+/* Respect the OS setting. Every motion primitive also checks this in JS. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer utilities {
+  .dot-grid {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .mask-radial {
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+    mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+  }
+
+  /* Kills the flash of a transparent gap while a gradient border animates. */
+  .will-transform { will-change: transform; }
+}
+
+/* Scroll-linked draw-in for <GradientRule animate />. Lives here rather than in
+   an inline <style> because React escapes quotes inside inline style text on the
+   server but not on the client, which hydrates as a text-content mismatch.
+   Scroll-driven animations are progressive enhancement: browsers without
+   animation-timeline, and anyone who asked for reduced motion, get the finished
+   rule instead of one stuck at scaleX(0). */
+@keyframes decor-rule-draw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-decor-rule="draw"] {
+      transform: scaleX(0);
+      animation: decor-rule-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 35%;
+    }
+  }
+}
