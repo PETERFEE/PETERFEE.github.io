@@ -1,69 +1,51 @@
 "use client";
 
-import { useState } from "react";
 import { withBasePath } from "@/lib/paths";
 
 export interface LiveDemoProps {
-  /** Path under /public to a self-contained HTML file. */
+  /** Path under /public, or an absolute URL, to a self-contained HTML demo. */
   src: string;
   title: string;
-  /** Shown on the poster before the demo is loaded. */
+  /** Short line describing how to interact with it. */
   hint?: string;
   repo: string;
 }
 
 /**
- * Click-to-load embed. Deliberately NOT auto-loading: the demo pulls Three.js
- * and builds a few thousand particles, which is rude to do unprompted on a
- * page someone is only scrolling past. It also means a missing demo file shows
- * this poster rather than a host's 404 page rendered inside the frame.
+ * The demo embedded live — the project IS the interface, so hiding it behind a
+ * poster would be hiding the work itself.
+ *
+ * Sizing: the heart is a tall shape, so this is height-driven rather than a
+ * fixed aspect — 78vh capped at 900px, floored at 420px. That gives a tall
+ * canvas on phones and a generous one on desktop without ever pushing the rest
+ * of the page off screen.
  */
 export function LiveDemo({ src, title, hint, repo }: LiveDemoProps) {
-  const [live, setLive] = useState(false);
   const resolved = withBasePath(src);
 
   return (
     <figure className="not-prose my-10">
-      <div className="relative overflow-hidden rounded-2xl border border-ink-600 bg-ink-850">
-        <div className="aspect-[16/10] w-full">
-          {live ? (
-            <iframe
-              src={resolved}
-              title={title}
-              className="h-full w-full border-0"
-              loading="lazy"
-              // The demo is first-party but sandboxed anyway: scripts and same-origin
-              // only, so it can run WebGL without reaching navigation or storage APIs.
-              sandbox="allow-scripts allow-same-origin"
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => setLive(true)}
-              className="group relative flex h-full w-full flex-col items-center justify-center gap-4 blueprint-grid transition-colors duration-500 ease-apple-out hover:bg-ink-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-soft focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950"
-              aria-label={`Load the interactive demo: ${title}`}
-            >
-              <span
-                aria-hidden
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-grad shadow-lg shadow-violet/30 transition-transform duration-500 ease-apple-out group-hover:scale-110"
-              >
-                <svg viewBox="0 0 24 24" className="h-6 w-6 translate-x-0.5 fill-white">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </span>
-              <span className="text-lg font-medium text-chalk">Run it here</span>
-              {hint ? (
-                <span className="max-w-sm px-6 text-center text-sm text-chalk-dim">{hint}</span>
-              ) : null}
-            </button>
-          )}
-        </div>
+      <div className="relative overflow-hidden rounded-2xl border border-ink-600 bg-black">
+        {/* A quiet brand hairline along the top edge, so the frame reads as part
+            of the page rather than a bare cutout. */}
+        <div aria-hidden className="absolute inset-x-0 top-0 z-10 h-px bg-brand-grad opacity-60" />
+        <iframe
+          src={resolved}
+          title={title}
+          // bg-black matters: an iframe paints its own background, so while it
+          // loads (or if the demo host is unreachable) the default white would
+          // flash a bright slab onto a near-black page.
+          className="block h-[min(78vh,900px)] min-h-[420px] w-full border-0 bg-black"
+          loading="lazy"
+          // First-party, but scoped anyway: enough for WebGL and its own input
+          // handling, nothing that reaches navigation, downloads or popups.
+          sandbox="allow-scripts allow-same-origin"
+          allow="accelerometer; gyroscope"
+        />
       </div>
 
-      <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-chalk-faint">
-        <span>
-          {live ? "Drag to rotate · scroll to zoom · type to change the message" : "Interactive — runs in the page"}
-        </span>
+      <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-sm text-chalk-faint">
+        <span>{hint ?? "Interactive — running live in the page"}</span>
         <span className="flex flex-wrap items-center gap-x-5 gap-y-1">
           <a
             href={resolved}

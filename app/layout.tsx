@@ -68,10 +68,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
         <AmbientField />
         <a
-          href="#work"
+          href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-full focus:bg-chalk focus:px-5 focus:py-2.5 focus:text-sm focus:font-medium focus:text-ink-950"
         >
-          Skip to the work
+          Skip to content
         </a>
         {children}
       </body>

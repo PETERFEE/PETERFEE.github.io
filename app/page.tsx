@@ -16,7 +16,7 @@ export default function Page() {
       <ScrollProgress />
       <SiteNav />
 
-      <main>
+      <main id="main">
         <Hero />
 
         {/* 1 — who this is. Portrait rail + about/interests/education. */}

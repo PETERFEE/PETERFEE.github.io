@@ -34,6 +34,12 @@ export interface ProjectShowcaseProps {
   project: Project;
   /** Zero-based position among featured projects; drives the big index mark. */
   index: number;
+  /**
+   * On a dedicated project page this block IS the page, so its title must be
+   * the h1. Inside the home page's list it stays an h2 under that section's
+   * own heading.
+   */
+  titleAs?: "h1" | "h2";
 }
 
 /**
@@ -50,9 +56,11 @@ export interface ProjectShowcaseProps {
  *      why the section wrapper deliberately does not clip.
  * Below `lg` the grid collapses to one column and the column is static.
  */
-export function ProjectShowcase({ project, index }: ProjectShowcaseProps) {
+export function ProjectShowcase({ project, index, titleAs = "h2" }: ProjectShowcaseProps) {
   const t = accentTheme[project.accent];
   const titleId = `${project.slug}-title`;
+  const TitleTag = titleAs;
+  const SubTag = titleAs === "h1" ? "h2" : "h3";
   const number = String(index + 1).padStart(2, "0");
 
   // One slot may be marked `lead`; fall back to the first slot so a project
@@ -93,12 +101,12 @@ export function ProjectShowcase({ project, index }: ProjectShowcaseProps) {
               <span>{project.year}</span>
             </p>
 
-            <h2
+            <TitleTag
               id={titleId}
               className="mt-4 text-balance text-headline text-chalk"
             >
               {project.title}
-            </h2>
+            </TitleTag>
 
             <p className="mt-5 max-w-[34ch] text-pretty text-lede text-chalk-dim">
               {project.tagline}
@@ -214,9 +222,9 @@ export function ProjectShowcase({ project, index }: ProjectShowcaseProps) {
                   />
                   <StaggerItem>
                     <span className="eyebrow">{String(i + 1).padStart(2, "0")}</span>
-                    <h3 className="mt-2.5 text-balance text-[1.0625rem] font-medium tracking-[-0.01em] text-chalk sm:text-lg">
+                    <SubTag className="mt-2.5 text-balance text-[1.0625rem] font-medium tracking-[-0.01em] text-chalk sm:text-lg">
                       {feature.title}
-                    </h3>
+                    </SubTag>
                     <p className="mt-2.5 max-w-prose text-pretty text-[0.9375rem] leading-relaxed text-chalk-dim">
                       {feature.detail}
                     </p>

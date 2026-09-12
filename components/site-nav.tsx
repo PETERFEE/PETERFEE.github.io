@@ -1,15 +1,28 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, type Variants } from "framer-motion";
 import { GradientRule, GridPanel, Orb } from "@/components/decor";
 import { EASE, useReducedMotion } from "@/components/motion";
 import { site } from "@/data/site";
+import { BASE_PATH } from "@/lib/paths";
 
 /** Pixels of scroll before the bar frosts over. Matches apple.com's feel: far
  *  enough that a trackpad nudge doesn't flicker it, close enough that the bar
  *  is solid before the hero headline slides under it. */
 const FROST_AT = 80;
+
+/**
+ * Nav targets are in-page anchors, and those sections exist only on the home
+ * page. From a project page at /projects/<slug>/, a bare "#about" resolves to
+ * /projects/<slug>/#about -- a dead link that silently does nothing. Off the
+ * home page, send the user home with the hash attached so the anchor lands.
+ */
+function resolveNavHref(href: string, onHome: boolean): string {
+  if (!href.startsWith("#") || onHome) return href;
+  return `${BASE_PATH}/${href}`;
+}
 
 const panelVariants: Variants = {
   hidden: { opacity: 0 },
@@ -90,6 +103,8 @@ export interface SiteNavProps {
 }
 
 export function SiteNav({ className }: SiteNavProps) {
+  const pathname = usePathname();
+  const onHome = pathname === "/" || pathname === "";
   const [frosted, setFrosted] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeHref, setActiveHref] = useState<string>("");
@@ -222,7 +237,7 @@ export function SiteNav({ className }: SiteNavProps) {
 
         <nav aria-label="Primary" className="shell relative flex h-16 items-center justify-between gap-4 md:h-[4.5rem]">
           <a
-            href="#top"
+            href={onHome ? "#top" : `${BASE_PATH}/`}
             onClick={close}
             className="group relative rounded-sm text-sm font-medium tracking-tight text-chalk transition-opacity duration-300 ease-apple hover:opacity-80"
           >
@@ -237,7 +252,11 @@ export function SiteNav({ className }: SiteNavProps) {
             <ul className="hidden items-center gap-7 md:flex lg:gap-9">
               {site.nav.map((item) => (
                 <li key={item.href}>
-                  <NavLink href={item.href} label={item.label} active={activeHref === item.href} />
+                  <NavLink
+                    href={resolveNavHref(item.href, onHome)}
+                    label={item.label}
+                    active={activeHref === item.href}
+                  />
                 </li>
               ))}
             </ul>
@@ -314,7 +333,7 @@ export function SiteNav({ className }: SiteNavProps) {
                 {site.nav.map((item, i) => (
                   <motion.li key={item.href} variants={reduce ? undefined : itemVariants}>
                     <a
-                      href={item.href}
+                      href={resolveNavHref(item.href, onHome)}
                       onClick={close}
                       className="group flex items-baseline gap-4 rounded-sm py-2 text-headline font-medium tracking-tight text-chalk transition-opacity duration-300 ease-apple hover:opacity-70"
                     >
