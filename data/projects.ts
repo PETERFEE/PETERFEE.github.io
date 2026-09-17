@@ -577,7 +577,7 @@ export const projects: Project[] = [
       {
         title: "Easter eggs",
         detail:
-          "The palette shifts for certain inputs, and typing LUCY sets off five seconds of fireworks.",
+          "remain hidden(ig you have to find out/or probably better not to find out)",
       },
     ],
     metrics: [
@@ -600,7 +600,7 @@ export const projects: Project[] = [
       {
         file: "fireworks.png",
         kind: "screenshot",
-        hint: "The LUCY fireworks easter egg mid-burst",
+        hint: "TOP level Secret",
         alt: "The fireworks easter egg",
         aspect: "16 / 9",
       },
