@@ -159,15 +159,4 @@ export const gallery: GalleryItem[] = [
     image: "/gallery/sv-tutorial.png",
     badge: "Fork",
   },
-  {
-    slug: "devotee",
-    title: "Devotee",
-    blurb: "Unity game — run an island as a god, from two linked perspectives",
-    tag: "Games",
-    accent: "amber",
-    href: "https://github.com/PETERFEE/Devotee",
-    internal: false,
-    image: "/gallery/devotee.png",
-    badge: "Team",
-  },
 ];

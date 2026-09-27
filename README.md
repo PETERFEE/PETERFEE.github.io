@@ -78,7 +78,6 @@ import to add and no manifest to update.
 | Regression Sim | `regression-sim/` | `output.png` |
 | LTspice Studies | `circuit-1-ltspice/` | `schematic.png` |
 | SystemVerilog Tutorial (gallery only) | `../gallery/` | `sv-tutorial.png` |
-| Devotee (gallery only) | `../gallery/` | `devotee.png` |
 
 The gallery tiles **reuse the same image file** as each project's detail section, so you
 only supply it once. The last two rows are gallery-only tiles and live in
