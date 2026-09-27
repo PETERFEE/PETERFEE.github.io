@@ -1,0 +1,1282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chicago · Four Days at Sunset</title>
+<meta name="description" content="An interactive 4-day Chicago itinerary (Nov 26–30, 2026) on a vertical timeline, over a real-time 3D skyline whose sun rises and sets with the plan.">
+<meta name="theme-color" content="#140811">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------ */
+/*  Tokens — pink obsidian                                             */
+/* ------------------------------------------------------------------ */
+:root{
+  --bg:#140811;
+  --card:rgba(38,15,31,.93);
+  --card-solid:#26101f;
+  --card-2:#311529;
+  --border:#4a2240;
+  --track:#4a2240;
+  --pink:#ff5fa2;
+  --pink-2:#ff8cc6;
+  --blush:#ffc4dd;
+  --peach:#ffb38a;
+  --violet:#c084fc;
+  --ink:#fff4f9;
+  --muted:#e2c3d3;
+  --faint:#bf98ad;
+  --radius:18px;
+  --display:"Fraunces", Georgia, serif;
+  --sans:"Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --topbar:58px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--topbar) + 16px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:var(--pink-2)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--pink-2);outline-offset:3px;border-radius:8px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ------------------------------------------------------------------ */
+/*  Layers: 3D scene < fallback sky < veil < particles < content       */
+/* ------------------------------------------------------------------ */
+#sky-fallback,#scene,#veil,#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#sky-fallback{z-index:0;background:linear-gradient(180deg,var(--fb-top,#5a3288) 0%,var(--fb-mid,#ff6fa3) 55%,var(--fb-hor,#ff9a76) 72%,#1a0914 72.2%,#140811 100%)}
+#scene{z-index:1;display:block}
+#veil{z-index:2;background:
+  radial-gradient(120% 60% at 50% 110%,rgba(20,8,17,.0),rgba(20,8,17,0) 40%),
+  linear-gradient(180deg,rgba(20,8,17,0) 0%,rgba(20,8,17,.10) 45%,rgba(20,8,17,.42) 100%)}
+#fx{z-index:3}
+.page{position:relative;z-index:4}
+
+/* ------------------------------------------------------------------ */
+/*  Top bar                                                            */
+/* ------------------------------------------------------------------ */
+.topbar{position:fixed;inset:0 0 auto 0;z-index:10;height:var(--topbar);display:flex;align-items:center;gap:12px;padding:0 max(16px,env(safe-area-inset-left));
+  background:rgba(20,8,17,.62);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid rgba(255,140,198,.14)}
+.brand{font:600 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--blush);white-space:nowrap;text-decoration:none}
+.brand b{color:var(--pink)}
+.pills{display:flex;gap:4px;margin:0 auto;overflow-x:auto;scrollbar-width:none;padding:4px}
+.pills::-webkit-scrollbar{display:none}
+.pill{flex:none;font:500 11px/1 var(--mono);letter-spacing:.08em;color:var(--faint);text-decoration:none;padding:8px 10px;border-radius:999px;border:1px solid transparent;transition:color .3s,background .3s,border-color .3s}
+.pill:hover{color:var(--ink)}
+.pill[aria-current="true"]{color:#2a0a1c;background:linear-gradient(90deg,var(--peach),var(--pink));border-color:transparent}
+.clock{font:500 11px/1.2 var(--mono);color:var(--muted);text-align:right;white-space:nowrap;min-width:118px}
+.clock span{display:block;color:var(--faint);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.tools{display:flex;gap:6px}
+.icon-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--border);background:rgba(38,15,31,.7);color:var(--blush);cursor:pointer;transition:border-color .25s,background .25s,color .25s}
+.icon-btn:hover{border-color:var(--pink);color:var(--ink)}
+.icon-btn[aria-pressed="true"]{background:rgba(255,95,162,.18);border-color:rgba(255,95,162,.6);color:var(--ink)}
+.icon-btn svg{width:18px;height:18px}
+@media (max-width:760px){.clock{display:none}.brand .long{display:none}}
+
+/* ------------------------------------------------------------------ */
+/*  Hero                                                               */
+/* ------------------------------------------------------------------ */
+.hero{min-height:100svh;display:grid;align-items:end;padding:calc(var(--topbar) + 32px) 16px clamp(48px,10vh,110px)}
+.hero-inner{max-width:1120px;width:100%;margin:0 auto}
+.kicker{display:inline-flex;align-items:center;gap:10px;font:500 12px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#fff;background:rgba(20,8,17,.45);border:1px solid rgba(255,196,221,.25);padding:9px 14px;border-radius:999px;backdrop-filter:blur(6px)}
+.kicker i{width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 12px var(--pink)}
+.hero h1{font:500 clamp(46px,9vw,118px)/.95 var(--display);letter-spacing:-.02em;margin:22px 0 18px;color:#fff;text-shadow:0 2px 30px rgba(60,10,40,.45)}
+.hero h1 em{font-style:italic;background:linear-gradient(92deg,#ffe0c2 0%,var(--peach) 30%,var(--pink) 70%,#e879f9 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 2px 18px rgba(255,95,162,.35))}
+.hero p.lede{max-width:620px;font-size:clamp(16px,2vw,19px);color:#fff;margin:0;text-shadow:0 1px 14px rgba(40,6,28,.7)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.stat{background:rgba(20,8,17,.55);border:1px solid rgba(255,196,221,.18);border-radius:14px;padding:12px 16px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.stat b{display:block;font:600 22px/1.1 var(--display);color:#fff}
+.stat span{font:500 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blush)}
+.cue{display:inline-flex;align-items:center;gap:10px;margin-top:34px;color:#fff;text-decoration:none;font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase}
+.cue span{width:26px;height:40px;border:1.5px solid rgba(255,255,255,.7);border-radius:14px;position:relative}
+.cue span::after{content:"";position:absolute;left:50%;top:8px;width:4px;height:8px;margin-left:-2px;border-radius:2px;background:#fff;animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%{opacity:0;transform:translateY(-3px)}40%{opacity:1}100%{opacity:0;transform:translateY(12px)}}
+
+/* ------------------------------------------------------------------ */
+/*  Sections                                                           */
+/* ------------------------------------------------------------------ */
+.section{padding:72px 16px}
+.wrap{max-width:1120px;margin:0 auto}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--pink-2);margin:0 0 12px}
+.h2{font:500 clamp(32px,5vw,54px)/1.05 var(--display);margin:0 0 12px;color:#fff;text-shadow:0 2px 24px rgba(20,4,14,.6)}
+.sub{color:var(--muted);max-width:640px;margin:0;text-shadow:0 1px 12px rgba(20,4,14,.8)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 20px 50px -24px rgba(0,0,0,.7)}
+
+.prep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px}
+@media (max-width:900px){.prep-grid{grid-template-columns:1fr}}
+.prep{padding:22px;display:flex;flex-direction:column;gap:10px}
+.prep .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(255,179,138,.22),rgba(255,95,162,.22));color:var(--blush);border:1px solid rgba(255,140,198,.3)}
+.prep .ic svg{width:20px;height:20px}
+.prep h3{font:600 21px/1.2 var(--display);margin:4px 0 0}
+.prep .price{font:500 13px/1 var(--mono);color:var(--peach)}
+.prep p{margin:0;color:var(--muted);font-size:14.5px}
+.prep ul{margin:0;padding-left:18px;color:var(--muted);font-size:14.5px}
+.prep .note{margin-top:auto}
+
+/* ------------------------------------------------------------------ */
+/*  Timeline                                                           */
+/* ------------------------------------------------------------------ */
+.timeline{position:relative;max-width:1180px;margin:40px auto 0}
+.track{position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:var(--track);border-radius:3px;overflow:hidden}
+.fill{position:absolute;inset:0;transform-origin:50% 0;transform:scaleY(var(--p,0));
+  background:linear-gradient(180deg,#ffd9b8 0%,var(--peach) 18%,var(--pink) 55%,#d946ef 80%,#a855f7 100%);will-change:transform;box-shadow:0 0 14px rgba(255,95,162,.6)}
+.tl{list-style:none;margin:0;padding:0;display:grid;gap:34px}
+.tl-item{position:relative;display:grid;grid-template-columns:1fr 76px 1fr;align-items:start}
+.tl-item .card-wrap{grid-row:1;min-width:0}
+.tl-item[data-side="left"] .card-wrap{grid-column:1}
+.tl-item[data-side="right"] .card-wrap{grid-column:3}
+.dot{grid-column:2;grid-row:1;justify-self:center;margin-top:26px;width:18px;height:18px;border-radius:50%;background:var(--card-solid);border:2px solid var(--border);position:relative;z-index:1;
+  transition:background .5s,border-color .5s,box-shadow .5s,transform .5s}
+.tl-item.is-active .dot{background:var(--pink);border-color:#ffd1e6;box-shadow:0 0 0 5px rgba(255,95,162,.2),0 0 22px 2px rgba(255,95,162,.85);transform:scale(1.08)}
+/* connector from dot to card */
+.tl-item:not(.tl-day) .card-wrap::before{content:"";position:absolute;top:34px;width:30px;height:2px;background:var(--border);transition:background .5s}
+.tl-item[data-side="left"]:not(.tl-day) .card-wrap::before{right:-30px}
+.tl-item[data-side="right"]:not(.tl-day) .card-wrap::before{left:-30px}
+.tl-item.is-active .card-wrap::before{background:linear-gradient(90deg,var(--pink),var(--peach))}
+.card-wrap{position:relative}
+
+/* Day milestone: badge on the track, wide card below */
+.tl-day{grid-template-columns:1fr;justify-items:center;margin-top:36px}
+.tl-day .badge{grid-row:1;position:relative;z-index:1;display:grid;place-items:center;width:78px;height:78px;border-radius:50%;background:var(--card-solid);border:2px solid var(--border);
+  font:600 13px/1 var(--mono);letter-spacing:.1em;color:var(--faint);text-align:center;transition:all .6s}
+.tl-day .badge b{display:block;font:600 26px/1 var(--display);letter-spacing:0;color:var(--muted);margin-top:4px;transition:color .6s}
+.tl-day.is-active .badge{background:radial-gradient(circle at 35% 30%,#ffd1e6,var(--pink) 55%,#c026d3);border-color:#ffe0ee;color:#3a0a24;
+  box-shadow:0 0 0 8px rgba(255,95,162,.16),0 0 40px 6px rgba(255,95,162,.55)}
+.tl-day.is-active .badge b{color:#2a0619}
+.tl-day .card-wrap{grid-row:2;width:min(920px,100%);margin-top:18px}
+
+/* Cards: dim until the progress line reaches their dot */
+.card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;opacity:.2;
+  transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:opacity .7s ease,border-color .7s,box-shadow .7s,transform .35s ease;box-shadow:0 24px 60px -30px rgba(0,0,0,.8)}
+.is-active .card{opacity:1;border-color:rgba(255,140,198,.34);box-shadow:0 24px 60px -28px rgba(0,0,0,.85),0 0 0 1px rgba(255,95,162,.08),0 0 44px -18px rgba(255,95,162,.5)}
+
+/* Entrance: CSS view timeline (compositor) where supported, IO class otherwise */
+@supports (animation-timeline: view()){
+  .card-wrap{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 90%}
+  @keyframes rise{from{transform:translateY(56px) scale(.965)}to{transform:none}}
+}
+@supports not (animation-timeline: view()){
+  .card-wrap{transform:translateY(44px);transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+  .is-seen .card-wrap{transform:none}
+}
+
+/* Day card */
+.day-card .hero-img{position:relative;aspect-ratio:21/9;overflow:hidden;background:linear-gradient(135deg,#5a2a52,#ff6fa3 60%,#ffb38a)}
+.day-card .hero-img img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 1.6s ease}
+.is-active .day-card .hero-img img{transform:scale(1)}
+.day-card .hero-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,8,17,0) 35%,rgba(38,15,31,.96) 100%)}
+.day-card .num{position:absolute;right:18px;top:6px;z-index:1;font:700 clamp(70px,12vw,140px)/1 var(--display);color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.75);letter-spacing:-.04em;pointer-events:none}
+.day-body{position:relative;padding:0 26px 26px;margin-top:-64px;z-index:1}
+.day-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--blush)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;background:rgba(255,95,162,.12);border:1px solid rgba(255,140,198,.3);color:var(--blush);font:500 12px/1 var(--mono);letter-spacing:.04em;text-transform:none}
+.chip svg{width:13px;height:13px}
+.chip.sun{background:rgba(255,179,138,.14);border-color:rgba(255,179,138,.35);color:#ffd9bf}
+.day-card h2{font:500 clamp(28px,4.4vw,44px)/1.08 var(--display);margin:12px 0 14px;color:#fff}
+.highlights{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.highlights li{font-size:14px;color:var(--ink);padding:8px 12px;border-radius:10px;background:var(--card-2);border:1px solid var(--border)}
+.highlights li::before{content:"✦";color:var(--pink);margin-right:7px;font-size:11px}
+
+/* Event card */
+.ev-card figure{margin:0;position:relative;aspect-ratio:16/9;overflow:hidden;background:linear-gradient(135deg,#4a1d45,#c0397a 60%,#ff9a76)}
+.ev-card figure img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s ease}
+.ev-card:hover figure img{transform:scale(1.045)}
+.credit{position:absolute;right:8px;bottom:8px;z-index:1;font:500 10px/1.3 var(--mono);color:rgba(255,255,255,.88);background:rgba(20,8,17,.6);padding:4px 7px;border-radius:6px;text-decoration:none;max-width:86%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.credit:hover{color:#fff;background:rgba(20,8,17,.85)}
+.img-missing img{display:none}
+.img-missing::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(255,255,255,.35),transparent 45%)}
+.ev-body{padding:20px 22px 22px}
+.ev-time{display:flex;align-items:center;gap:8px;margin:0 0 8px;font:500 13px/1 var(--mono);color:var(--peach)}
+.ev-time svg{width:14px;height:14px}
+.ev-card h3{font:600 21px/1.25 var(--display);margin:0 0 8px;color:#fff}
+.pass{display:inline-block;vertical-align:middle;margin-left:6px;font:500 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#2a0a1c;background:linear-gradient(90deg,var(--peach),var(--pink));padding:5px 8px;border-radius:999px}
+.ev-detail{margin:0 0 14px;color:var(--muted);font-size:15px}
+.meta{display:grid;gap:8px;margin:0}
+.meta div{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:14px}
+.meta dt{color:var(--pink-2);padding-top:2px}
+.meta dt svg{width:15px;height:15px}
+.meta dd{margin:0;color:var(--ink)}
+.cost{color:#ffd9bf;font-family:var(--mono);font-size:13px}
+.note{display:flex;gap:9px;align-items:flex-start;margin:14px 0 0;padding:11px 13px;border-radius:12px;background:rgba(255,95,162,.08);border:1px dashed rgba(255,140,198,.32);color:var(--muted);font-size:13.5px}
+.note svg{flex:none;width:15px;height:15px;margin-top:3px;color:var(--pink-2)}
+
+/* Mobile: single rail on the left */
+@media (max-width:860px){
+  .track{left:21px}
+  .tl-item,.tl-day{grid-template-columns:44px 1fr;justify-items:stretch}
+  .tl-item .card-wrap,.tl-item[data-side] .card-wrap{grid-column:2}
+  .dot{grid-column:1}
+  .tl-item[data-side]:not(.tl-day) .card-wrap::before{left:-22px;right:auto;width:22px}
+  .tl-day .badge{grid-column:1 / -1;justify-self:start;margin-left:-8px;width:60px;height:60px;font-size:10px}
+  .tl-day .badge b{font-size:20px}
+  .tl-day .card-wrap{grid-column:2;width:100%}
+  .day-card .hero-img{aspect-ratio:16/10}
+  .day-body{padding:0 18px 20px}
+  .ev-body{padding:16px 16px 18px}
+}
+
+/* ------------------------------------------------------------------ */
+/*  Budget + credits                                                   */
+/* ------------------------------------------------------------------ */
+.budget{margin-top:30px;padding:8px 0;overflow:hidden}
+.budget table{width:100%;border-collapse:collapse;font-size:15px}
+.budget th,.budget td{padding:14px 22px;text-align:left;border-bottom:1px solid rgba(74,34,64,.7)}
+.budget th{font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.budget td:last-child,.budget th:last-child{text-align:right;font-family:var(--mono);color:#ffd9bf;white-space:nowrap}
+.budget tr.total td{border-bottom:0;font-weight:600;color:#fff;font-size:17px}
+.budget tr.total td:last-child{color:var(--pink-2)}
+.budget small{display:block;color:var(--faint);font-size:12.5px;margin-top:2px}
+@media (max-width:600px){.budget th,.budget td{padding:12px 14px}}
+.finale{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:22px;padding:22px 24px}
+.finale p{margin:0;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:9px;border:0;cursor:pointer;font:600 14px/1 var(--sans);color:#2a0a1c;padding:14px 18px;border-radius:12px;background:linear-gradient(90deg,var(--peach),var(--pink));box-shadow:0 10px 30px -10px rgba(255,95,162,.8);transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px -10px rgba(255,95,162,.95)}
+.btn svg{width:17px;height:17px}
+footer{padding:40px 16px 60px}
+.credits{columns:2 320px;column-gap:28px;font-size:12.5px;color:var(--faint);padding:22px 24px;margin:18px 0 0}
+.credits p{break-inside:avoid;margin:0 0 6px}
+.credits a{color:var(--muted)}
+.fine{font-size:12.5px;color:var(--faint);margin:18px 0 0}
+
+@media (prefers-reduced-motion:reduce){
+  .card-wrap{animation:none!important;transform:none!important}
+  .card,.dot,.badge{transition:none}
+  .cue span::after{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="sky-fallback" aria-hidden="true"></div>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div id="veil" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-train" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M9 21l-2-3M15 21l2-3"/><circle cx="9" cy="14" r=".6" fill="currentColor"/><circle cx="15" cy="14" r=".6" fill="currentColor"/></symbol>
+    <symbol id="i-cash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></symbol>
+    <symbol id="i-bed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.8"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M13 6v2M13 11v2M13 16v2"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 18a5 5 0 0 0-10 0"/><path d="M12 9V2M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1"/></symbol>
+    <symbol id="i-snow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M4.9 6.5l14.2 11M4.9 17.5l14.2-11M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <a class="brand" href="#top"><b>CHI</b> <span class="long">· 26–30 Nov</span></a>
+  <nav class="pills" aria-label="Jump to day" id="pills"></nav>
+  <div class="clock" aria-live="off"><span id="clock-day">Thu · Nov 26</span><b id="clock-time">3:50 PM</b></div>
+  <div class="tools">
+    <button class="icon-btn" id="snow-btn" type="button" aria-pressed="true" title="Snow"><svg><use href="#i-snow"/></svg><span class="sr-only">Toggle snow</span></button>
+    <button class="icon-btn" id="fw-btn" type="button" title="Fireworks"><svg><use href="#i-spark"/></svg><span class="sr-only">Launch fireworks</span></button>
+  </div>
+</header>
+
+<div class="page" id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <span class="kicker"><i></i>Nov 26 – 30, 2026 · Two travelers · Four nights</span>
+      <h1 id="hero-title">Four days in <em>Chicago</em></h1>
+      <p class="lede">Museum Campus by day, the Skydeck by night, Hello Kitty on Michigan Avenue, then pho, hotpot and the Christkindlmarket in the snow. Scroll down to follow the plan.</p>
+      <div class="stats">
+        <div class="stat"><b>4</b><span>nights · HI Chicago</span></div>
+        <div class="stat"><b>5</b><span>CityPASS stops</span></div>
+        <div class="stat"><b id="stat-total">$—</b><span>est. for two, excl. flights</span></div>
+        <div class="stat"><b>4:21 PM</b><span>Chicago sunset</span></div>
+      </div>
+      <a class="cue" href="#prep"><span></span>Scroll the itinerary</a>
+    </div>
+  </section>
+
+  <section class="section" id="prep" aria-labelledby="prep-title">
+    <div class="wrap">
+      <p class="eyebrow">Before you go</p>
+      <h2 class="h2" id="prep-title">Book these three first</h2>
+      <p class="sub">Everything else in the plan hangs off a bed, a pass, and a train card.</p>
+      <div class="prep-grid" id="prep-grid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="plan" aria-labelledby="plan-title" style="padding-top:24px">
+    <div class="wrap">
+      <p class="eyebrow">The itinerary</p>
+      <h2 class="h2" id="plan-title">Hour by hour</h2>
+      <p class="sub">The line fills as you scroll. Each stop lights up when the line reaches it, and the 3D skyline behind the page moves to that hour of the day.</p>
+    </div>
+    <div class="timeline" id="timeline">
+      <div class="track" aria-hidden="true"><div class="fill" id="fill"></div></div>
+      <ol class="tl" id="tl"></ol>
+    </div>
+  </section>
+
+  <section class="section" id="budget" aria-labelledby="budget-title">
+    <div class="wrap">
+      <p class="eyebrow">The math</p>
+      <h2 class="h2" id="budget-title">What it costs for two</h2>
+      <p class="sub">Food is the sum of every meal estimate on the timeline above. The hostel total depends on your booking.</p>
+      <div class="panel budget"><table id="budget-table"></table></div>
+      <div class="panel finale">
+        <p>That's the whole plan. Click anywhere on the sky to launch a firework.</p>
+        <button class="btn" type="button" id="finale-btn"><svg><use href="#i-spark"/></svg>Launch the finale</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p class="eyebrow">Photo credits</p>
+      <div class="panel credits" id="credits"></div>
+      <p class="fine">Hours, prices, and timed entries are planning estimates. Check them before you book. The 3D skyline is drawn procedurally in WebGL; landmark positions are only approximate.</p>
+    </div>
+  </footer>
+</div>
+
+<noscript><p style="position:relative;z-index:5;padding:24px;color:#fff">This itinerary needs JavaScript to draw the timeline.</p></noscript>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+<script>
+/* ================================================================== */
+/*  Content schema                                                     */
+/*  Every day: dayNumber, title, vibe (coordinate vibe), highlights.   */
+/*  Every stop: start hour (drives the 3D sun), camera shot, details.  */
+/* ================================================================== */
+const PHOTOS = {
+  skyline:  { file: "Chicago_Loop_Skyline_at_Sunset.jpg", by: "GazeboJake", lic: "CC0" },
+  ohareCta: { file: "CTA_O'Hare_Blue_Line_Station.jpg", by: "bclinesmith", lic: "CC BY-SA 2.0" },
+  river:    { file: "Chicago_River_night_3.jpg", by: "Daniel Schwen", lic: "CC BY-SA 4.0" },
+  riverwalk:{ file: "Chicago_Riverwalk_(51556708640).jpg", by: "ajay_suresh", lic: "CC BY 2.0" },
+  shedd:    { file: "Shedd_Aquarium_E.jpg", by: "Sea Cow", lic: "CC BY-SA 4.0" },
+  reef:     { file: "Caribbean_Reef_tank_at_Shedd_Aquarium,_2009-11-15.jpg", by: "Sage Ross", lic: "CC BY-SA 3.0" },
+  sue:      { file: "FMNH_SUE_Trex.jpg", by: "Evolutionnumber9", lic: "CC BY-SA 4.0" },
+  willis:   { file: "Sears_Tower,_Wacker_Drive_and_Jackson_Boulevard,_Chicago,_IL_-_54189600901.jpg", by: "w_lemay", lic: "CC BY-SA 2.0" },
+  ledge:    { file: "The_Ledge,_Willis_Tower_Skydeck,_Chicago,_Illinois_(42675297114).jpg", by: "Ken Lund", lic: "CC BY-SA 2.0" },
+  park:     { file: "Millennium_Square,_Chicago,_Illinois_(9181701264).jpg", by: "Ken Lund", lic: "CC BY-SA 2.0" },
+  art:      { file: "Art_Institute_of_Chicago_(49692750156).jpg", by: "Raed Mansour", lic: "CC BY 2.0" },
+  xmasAve:  { file: "Chicago,_Christmas_2007_(2122645768).jpg", by: "Dan Perry", lic: "CC BY 2.0" },
+  magMile:  { file: "20070513_Magnificent_Mile.JPG", by: "TonyTheTiger", lic: "CC BY-SA 3.0" },
+  hancock:  { file: "Chicago_in_2022_John_Hancock_Center_(52054925135).jpg", by: "Chris Rycroft", lic: "CC BY 2.0" },
+  pho:      { file: "Beef_noodle_soup_(Phở_bò)_-_Pho_Hanoi_Authentic_2024-12-01.jpg", by: "Andy Li", lic: "CC0" },
+  gate:     { file: "Chinatown_Chicago_Gate.jpg", by: "Han Zheng", lic: "CC BY-SA 2.0" },
+  hotpot:   { file: "Hai_Di_Lao_Hot_Pot_Food.jpg", by: "Hollyhe888", lic: "CC BY-SA 4.0" },
+  market:   { file: "ChristkindlmarketChicago.jpg", by: "DR04", lic: "CC BY 3.0" },
+  ohareAir: { file: "O'Hare_International_Airport_(Iss069e037725)_(cropped).jpg", by: "NASA JSC", lic: "Public domain" },
+};
+
+const PREP = [
+  {
+    icon: "bed", title: "HI Chicago Hostel", price: "Total TBD · 4 nights",
+    text: "24 E Ida B Wells Dr, in the Loop. Check in Nov 26 at 4 PM and check out Nov 30 by 11 AM.",
+    list: ["Room: Twin Over Full Bunk Bedroom (private, two separate beds)", "Bring an original government photo ID", "Bring a padlock if you use a dorm locker"],
+    note: "Before booking, confirm the room layout, bathroom, taxes, fees and cancellation terms. Don't pick a single full-bed room.",
+  },
+  {
+    icon: "ticket", title: "Chicago CityPASS × 2", price: "$288 · $144 each",
+    text: "Five attractions, valid for 9 consecutive days, so a missed stop can move to Sunday.",
+    list: ["Shedd Aquarium", "Field Museum", "Skydeck Chicago", "Art Institute of Chicago", "360 CHICAGO"],
+    note: "Reserve Shedd, Skydeck and 360 CHICAGO. The times in this plan depend on which slots are open.",
+  },
+  {
+    icon: "train", title: "CTA 7-day passes × 2", price: "$40 · $20 each",
+    text: "Unlimited buses and 'L' trains for the whole stay, including the Blue Line from O'Hare with no airport surcharge.",
+    list: ["Buy one per person at the airport station", "ORD → Blue Line · MDW → Orange Line"],
+    note: "Check the current fare and whether the card has an issuance cost. The pass is counted once in the budget.",
+  },
+];
+
+const DAYS = [
+  {
+    id: "day-1", dayNumber: "Day 01", label: "01", date: "Thu · Nov 26", day: 0, hour: 15.6, cam: "wide",
+    title: "Touchdown on Thanksgiving",
+    vibe: "The Loop / Downtown",
+    highlights: ["CTA from the airport", "HI Chicago check-in", "Riverfront night walk"],
+    photo: "river",
+    stops: [
+      { t: "4:00 – 5:00 PM", h: 16.0, cam: "wide", title: "Land in Chicago", photo: "ohareCta",
+        detail: "Collect bags and walk to the airport train station. Leave extra time for delays.",
+        go: "Follow signs for CTA Trains", cost: "No activity cost",
+        note: "It's Thanksgiving Day, so don't book any prepaid evening attraction." },
+      { t: "5:00 – 6:15 PM", h: 17.0, cam: "river", title: "Airport → HI Chicago",
+        detail: "ORD: Blue Line toward Forest Park to LaSalle, then walk east. MDW: Orange Line toward the Loop to Harold Washington Library–State/Van Buren, then walk.",
+        go: "≈ 60–90 min from ORD · 40–60 min from MDW", cost: "Included in CTA pass",
+        note: "Take the route for your airport, and allow extra time for holiday service." },
+      { t: "6:15 – 7:00 PM", h: 18.25, cam: "river", title: "Hostel check-in",
+        detail: "Drop bags, settle in, and ask the front desk which nearby restaurants are serving dinner.",
+        where: "24 E Ida B Wells Drive", cost: "Included in lodging",
+        note: "Bring your original government-issued photo ID." },
+      { t: "7:00 – 8:00 PM", h: 19.0, cam: "river", title: "Thanksgiving arrival dinner",
+        detail: "A simple dinner near the hostel, at a place with confirmed Thanksgiving hours. Skip long cross-city trips after the flight.",
+        go: "Short walk", cost: "$35–50", costs: [35, 50],
+        note: "Pick the restaurant once holiday hours are posted." },
+      { t: "8:00 – 8:30 PM", h: 20.0, cam: "river", title: "Optional downtown walk", photo: "riverwalk",
+        detail: "A short loop around the nearby downtown streets and the river bridges. Skip it if you're tired or it's cold.",
+        go: "Walk and return to hostel", cost: "Free" },
+    ],
+  },
+  {
+    id: "day-2", dayNumber: "Day 02", label: "02", date: "Fri · Nov 27", day: 1, hour: 7.3, cam: "museum",
+    title: "Aquarium, Dinosaurs & Night Skyline",
+    vibe: "Museum Campus → Willis Tower",
+    highlights: ["Shedd Aquarium", "SUE the T. rex", "Skydeck Ledge at night"],
+    photo: "reef",
+    stops: [
+      { t: "7:30 – 8:15 AM", h: 7.5, cam: "wide", title: "Breakfast",
+        detail: "Groceries in the guest kitchen, or a quick breakfast nearby.",
+        where: "At hostel / nearby", cost: "$10–20", costs: [10, 20],
+        note: "Breakfast inclusion isn't verified, so don't count on it being free." },
+      { t: "8:15 – 9:00 AM", h: 8.25, cam: "museum", title: "Travel to Shedd Aquarium",
+        detail: "Leave time for transit, the walk, security and entry.",
+        go: "CTA bus; check the route that morning · 30–45 min", cost: "Included in CTA pass",
+        note: "Take a rideshare if the weather is rough (extra cost)." },
+      { t: "9:00 AM – 12:00 PM", h: 9.0, cam: "museum", title: "Shedd Aquarium", pass: "CityPASS 1", photo: "shedd",
+        detail: "Aquatic habitats and animal exhibits. Fit the included 4-D experience around its showtimes.",
+        where: "1200 S DuSable Lake Shore Drive", cost: "Included in CityPASS",
+        note: "Aim for the earliest reservation. 9 AM is provisional until that day's schedule is out." },
+      { t: "12:00 – 12:45 PM", h: 12.0, cam: "museum", title: "Lunch at Museum Campus",
+        detail: "An on-site café or a packed lunch where allowed. Stay on campus to protect museum time.",
+        go: "Walk between museum buildings", cost: "$30–40", costs: [30, 40] },
+      { t: "1:00 – 4:00 PM", h: 13.0, cam: "museum", title: "Field Museum", pass: "CityPASS 2", photo: "sue",
+        detail: "Put SUE and the dinosaur galleries first, then add whatever exhibits you both like. Choose the included add-ons that fit.",
+        where: "1400 S DuSable Lake Shore Drive · ~10-min walk from Shedd", cost: "Included in CityPASS",
+        note: "The published closing time is 5 PM. Check the hours for that date." },
+      { t: "4:00 – 4:45 PM", h: 16.0, cam: "willis", title: "Travel to Willis Tower",
+        detail: "Head toward the Skydeck, with a break to warm up.",
+        go: "CTA + walking · 35–45 min", cost: "Included in CTA pass" },
+      { t: "4:45 – 5:30 PM", h: 16.75, cam: "willis", title: "Early dinner near Willis Tower", photo: "willis",
+        detail: "A casual meal around the tower or in its dining area.",
+        go: "Walk", cost: "$35–50", costs: [35, 50],
+        note: "Keep dinner flexible in case the museum runs late." },
+      { t: "5:45 – 7:15 PM", h: 17.75, cam: "willis", title: "Skydeck Chicago", pass: "CityPASS 3", photo: "ledge",
+        detail: "The city at night, 103 floors up. Take your photos on The Ledge, the glass box that sticks out from the building.",
+        where: "233 S Wacker Dr · entrance on Jackson Blvd", cost: "Included in CityPASS",
+        note: "Reserve an evening slot and check visibility. Express access doesn't skip every line." },
+      { t: "7:15 – 7:45 PM", h: 19.25, cam: "river", title: "Back to HI Chicago",
+        detail: "Walk back and rest. This is the busiest day of the trip.",
+        go: "≈ 20–25 min on foot", cost: "Free" },
+    ],
+  },
+  {
+    id: "day-3", dayNumber: "Day 03", label: "03", date: "Sat · Nov 28", day: 2, hour: 8.3, cam: "park",
+    title: "Art, Hello Kitty & Lake Views",
+    vibe: "Millennium Park / Magnificent Mile",
+    highlights: ["Cloud Gate", "Art Institute", "Hello Kitty Cafe", "360 CHICAGO at dusk"],
+    photo: "park",
+    stops: [
+      { t: "8:30 – 9:15 AM", h: 8.5, cam: "wide", title: "Breakfast",
+        detail: "A simple breakfast at the hostel or nearby. Bring warm layers for the outdoor parts.",
+        go: "Walk", cost: "$10–20", costs: [10, 20] },
+      { t: "9:30 – 10:30 AM", h: 9.5, cam: "park", title: "Millennium Park & Cloud Gate",
+        detail: "Take your Bean photos and wander the park. Duck indoors if it's windy or wet.",
+        go: "≈ 15–20 min walk from the hostel", cost: "Free" },
+      { t: "11:00 AM – 1:30 PM", h: 11.0, cam: "park", title: "Art Institute of Chicago", pass: "CityPASS 4", photo: "art",
+        detail: "Pick a few galleries and the famous works instead of trying to cover the whole museum.",
+        where: "111 S Michigan Avenue", cost: "Included in CityPASS",
+        note: "Check the public opening hours for Nov 28." },
+      { t: "1:30 – 2:15 PM", h: 13.5, cam: "mile", title: "Lunch downtown",
+        detail: "A light lunch on the way north toward the river.",
+        go: "Walk north · 15–25 min", cost: "$30–40", costs: [30, 40],
+        note: "Save room for Hello Kitty desserts." },
+      { t: "2:30 – 3:30 PM", h: 14.5, cam: "mile", title: "Hello Kitty Cafe", photo: "xmasAve", photoCaption: "Michigan Avenue in holiday season",
+        detail: "Drinks, dessert, photos and merchandise. This plan uses the regular café, not the Bow Room.",
+        where: "360 N Michigan Avenue", cost: "$30–50 · merch extra", costs: [30, 50],
+        note: "Regular hours are 10 AM–8 PM; expect a line. Bow Room afternoon tea is a separate, reservation-only experience." },
+      { t: "3:30 – 4:15 PM", h: 15.5, cam: "mile", title: "Magnificent Mile", photo: "magMile",
+        detail: "Walk north past the storefronts and architecture.",
+        go: "≈ 25–35 min walk to 360 CHICAGO · transit if cold", cost: "Free unless shopping",
+        note: "Keep shopping stops short if you have a timed observation-deck booking." },
+      { t: "4:15 – 5:30 PM", h: 16.25, cam: "hancock", title: "360 CHICAGO", pass: "CityPASS 5", photo: "hancock",
+        detail: "The lakefront and skyline at sunset, 94 floors up. This is the pink-sky moment of the trip.",
+        where: "875 N Michigan Avenue", cost: "Included in CityPASS · TILT extra",
+        note: "Reserve entry. If visibility is poor, move this visit to Sunday (the pass allows it)." },
+      { t: "6:00 – 7:15 PM", h: 18.0, cam: "hancock", title: "Dinner in River North",
+        detail: "Chicago pizza or another casual dinner that fits the budget.",
+        go: "Walk / CTA", cost: "$40–55", costs: [40, 55],
+        note: "Nothing is booked, and holiday-weekend waits may be long." },
+      { t: "7:15 – 8:00 PM", h: 19.25, cam: "river", title: "Back to HI Chicago",
+        detail: "Head back for a relaxed evening.",
+        go: "Red Line toward 95th/Dan Ryan: Chicago → Harrison, then walk · 30–40 min", cost: "Included in CTA pass" },
+    ],
+  },
+  {
+    id: "day-4", dayNumber: "Day 04", label: "04", date: "Sun · Nov 29", day: 3, hour: 9.0, cam: "chinatown",
+    title: "Pho, Chinatown & Christmas Lights",
+    vibe: "Chinatown → Daley Plaza",
+    highlights: ["Pho Cafe brunch", "Wentworth Avenue", "Happy Lamb Hot Pot", "Christkindlmarket"],
+    photo: "gate",
+    stops: [
+      { t: "9:00 – 10:00 AM", h: 9.0, cam: "wide", title: "Slow morning",
+        detail: "A light breakfast, some rest, or a hostel activity if the timing works.",
+        where: "At hostel", cost: "$10–15", costs: [10, 15],
+        note: "Keep breakfast small because pho brunch is next." },
+      { t: "10:30 – 11:00 AM", h: 10.5, cam: "chinatown", title: "Travel to Chinatown",
+        detail: "Ride to Cermak–Chinatown and walk to Pho Cafe.",
+        go: "Red Line toward 95th/Dan Ryan: Harrison → Cermak–Chinatown · 20–30 min", cost: "Included in CTA pass" },
+      { t: "11:00 AM – 12:00 PM", h: 11.0, cam: "chinatown", title: "Pho Cafe brunch", photo: "pho",
+        detail: "Pho. Share spring rolls or a Vietnamese coffee if you like.",
+        where: "232 W Cermak Road", cost: "$40–55", costs: [40, 55],
+        note: "It usually opens at 11 AM. Check holiday-weekend hours." },
+      { t: "12:00 – 2:30 PM", h: 12.0, cam: "chinatown", title: "Explore Chinatown",
+        detail: "Chinatown Square, Wentworth Avenue, shops, photo stops, and a bakery snack if you want one.",
+        go: "Walk around Chinatown", cost: "Free · snacks extra" },
+      { t: "2:30 – 3:30 PM", h: 14.5, cam: "chinatown", title: "Rest / flexible buffer",
+        detail: "Take an indoor break or keep browsing. This buffer absorbs any restaurant wait.",
+        where: "Near Wentworth Avenue", cost: "Personal spending" },
+      { t: "3:30 – 5:00 PM", h: 15.5, cam: "chinatown", title: "Happy Lamb Hot Pot", photo: "hotpot",
+        detail: "An early hotpot dinner. Pick your broth, meats and vegetables from the current menu.",
+        where: "2312 S Wentworth Avenue", cost: "$90–120", costs: [90, 120],
+        note: "Check prices, hours and the reservation or waitlist policy. Eating early can shorten the wait." },
+      { t: "5:00 – 5:45 PM", h: 17.0, cam: "daley", title: "Travel to Christkindlmarket",
+        detail: "Head back north toward the Loop.",
+        go: "Red Line toward Howard → Lake, walk to Daley Plaza · 30–45 min", cost: "Included in CTA pass" },
+      { t: "5:45 – 7:00 PM", h: 17.75, cam: "daley", title: "Christkindlmarket", photo: "market", fireworks: true,
+        detail: "Holiday stalls, ornaments, gifts, and a hot chocolate in a souvenir mug.",
+        where: "Daley Plaza · 50 W Washington Street", cost: "Free · $10–25 treats", costs: [10, 25],
+        note: "The announced 2026 season (Nov 20 – Dec 24) covers your dates. Check daily hours and expect crowds." },
+      { t: "7:00 – 7:30 PM", h: 19.0, cam: "river", title: "Back to hostel & pack",
+        detail: "Walk or take the CTA back, then pack for departure.",
+        go: "≈ 20–25 min walk", cost: "Free",
+        note: "Keep your ID, chargers and flight essentials where you can reach them." },
+    ],
+  },
+  {
+    id: "depart", dayNumber: "Depart", label: "✈", date: "Mon · Nov 30", day: 4, hour: 7.8, cam: "air",
+    title: "Wheels Up to Orlando",
+    vibe: "The Loop → ORD / MDW → MCO",
+    highlights: ["Check out by 11 AM", "Blue Line to O'Hare", "~4 PM flight to MCO"],
+    photo: "ohareAir",
+    stops: [
+      { t: "8:00 – 9:00 AM", h: 8.0, cam: "wide", title: "Breakfast & flight check",
+        detail: "Eat breakfast and check your flight status.",
+        where: "At hostel / nearby", cost: "$10–20", costs: [10, 20],
+        note: "Confirm ORD or MDW before you pick a route." },
+      { t: "9:00 – 10:30 AM", h: 9.0, cam: "wide", title: "Pack & a last walk",
+        detail: "Stay close to the hostel, with no museum this morning.",
+        go: "Walk", cost: "Free" },
+      { t: "10:30 – 11:00 AM", h: 10.5, cam: "wide", title: "Check out of HI Chicago",
+        detail: "Check out by 11 AM. Keep your bags with you, or store them for a short time.",
+        where: "At hostel", cost: "Bag storage $4 / bag (optional)" },
+      { t: "11:00 – 11:45 AM", h: 11.0, cam: "wide", title: "Early lunch",
+        detail: "A quick meal near the hostel. If you stored bags, pick them up first.",
+        go: "Walk", cost: "$25–35", costs: [25, 35] },
+      { t: "11:45 AM – 1:15 PM", h: 11.75, cam: "air", title: "Travel to the airport",
+        detail: "ORD: LaSalle → Blue Line toward O'Hare. MDW: Harold Washington Library → Orange Line toward Midway.",
+        go: "60–90 min to ORD · 45–75 min to MDW", cost: "Included in CTA pass",
+        note: "Leave earlier if disruptions are reported. Aim to arrive by about 1:00–1:30 PM." },
+      { t: "1:15 – 4:00 PM", h: 13.25, cam: "air", title: "Check-in, security & flight",
+        detail: "Drop checked bags, clear security and get to the gate for the ~4 PM flight to MCO.",
+        where: "Inside the airport", cost: "Airport purchases extra",
+        note: "Follow the airline's boarding and bag-drop deadlines." },
+    ],
+  },
+];
+
+const BUDGET_FIXED = [
+  { label: "Two CityPASS tickets", detail: "Current listed price", lo: 288, hi: 288 },
+  { label: "Two 7-day CTA passes", detail: "Airport trains included", lo: 40, hi: 40 },
+  { label: "Optional rideshares", detail: "Cold-weather backup", lo: 40, hi: 100 },
+  { label: "Contingency", detail: "Holiday-weekend surprises", lo: 0, hi: 150 },
+];
+
+/* ================================================================== */
+/*  Rendering                                                          */
+/* ================================================================== */
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const icon = (id) => `<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
+const photoSrc = (k, w) => `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(PHOTOS[k].file)}?width=${w}`;
+const photoPage = (k) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(PHOTOS[k].file)}`;
+const money = (n) => "$" + n.toLocaleString("en-US");
+
+function figure(key, alt, w, cls = "", eager = false) {
+  const p = PHOTOS[key];
+  return `<figure class="${cls}">
+    <img src="${photoSrc(key, w)}" alt="${esc(alt)}" loading="${eager ? "eager" : "lazy"}" decoding="async" referrerpolicy="no-referrer"
+      onerror="this.parentNode.classList.add('img-missing')">
+    <a class="credit" href="${photoPage(key)}" target="_blank" rel="noopener">© ${esc(p.by)} · ${esc(p.lic)}</a>
+  </figure>`;
+}
+
+function renderPrep() {
+  $("#prep-grid").innerHTML = PREP.map((c) => `
+    <article class="panel prep">
+      <div class="ic">${icon(c.icon)}</div>
+      <h3>${esc(c.title)}</h3>
+      <span class="price">${esc(c.price)}</span>
+      <p>${esc(c.text)}</p>
+      <ul>${c.list.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>
+      <p class="note">${icon("note")}<span>${esc(c.note)}</span></p>
+    </article>`).join("");
+}
+
+function stopCard(s) {
+  const meta = [];
+  if (s.where) meta.push(["pin", "Where", s.where]);
+  if (s.go) meta.push(["train", "Getting there", s.go]);
+  meta.push(["cash", "Cost for 2", `<span class="cost">${esc(s.cost)}</span>`, true]);
+  return `<div class="card ev-card">
+    ${s.photo ? figure(s.photo, s.photoCaption || s.title, 900) : ""}
+    <div class="ev-body">
+      <p class="ev-time">${icon("clock")}${esc(s.t)}</p>
+      <h3>${esc(s.title)}${s.pass ? `<span class="pass">${esc(s.pass)}</span>` : ""}</h3>
+      <p class="ev-detail">${esc(s.detail)}</p>
+      <dl class="meta">${meta.map(([ic, label, val, raw]) =>
+        `<div><dt>${icon(ic)}<span class="sr-only">${label}</span></dt><dd>${raw ? val : esc(val)}</dd></div>`).join("")}</dl>
+      ${s.note ? `<p class="note">${icon("note")}<span>${esc(s.note)}</span></p>` : ""}
+    </div>
+  </div>`;
+}
+
+function renderTimeline() {
+  const out = [];
+  let side = 0;
+  DAYS.forEach((d, di) => {
+    out.push(`<li class="tl-item tl-day" id="${d.id}" data-day="${d.day}" data-hour="${d.hour}" data-cam="${d.cam}" data-index="${di + 1}">
+      <div class="badge" aria-hidden="true">${d.label === "✈" ? "FLY" : "DAY"}<b>${d.label}</b></div>
+      <article class="card-wrap" aria-labelledby="${d.id}-t">
+        <div class="card day-card">
+          <div class="hero-img">${figure(d.photo, d.title, 1600, "", di === 0).replace(/^<figure class="">|<\/figure>$/g, "")}<span class="num" aria-hidden="true">${d.label === "✈" ? "✈" : d.label}</span></div>
+          <div class="day-body">
+            <div class="day-meta">
+              <span>${esc(d.dayNumber)} · ${esc(d.date)}</span>
+              <span class="chip">${icon("pin")}${esc(d.vibe)}</span>
+              ${d.label === "✈" ? "" : `<span class="chip sun">${icon("sun")}Sunset ≈ 4:21 PM</span>`}
+            </div>
+            <h2 id="${d.id}-t">${esc(d.title)}</h2>
+            <ul class="highlights">${d.highlights.map((h) => `<li>${esc(h)}</li>`).join("")}</ul>
+          </div>
+        </div>
+      </article>
+    </li>`);
+    d.stops.forEach((s) => {
+      out.push(`<li class="tl-item" data-side="${side++ % 2 ? "right" : "left"}" data-day="${d.day}" data-hour="${s.h}" data-cam="${s.cam}" data-index="${di + 1}"${s.fireworks ? " data-fireworks" : ""}>
+        <span class="dot" aria-hidden="true"></span>
+        <article class="card-wrap">${stopCard(s)}</article>
+      </li>`);
+    });
+  });
+  $("#tl").innerHTML = out.join("");
+
+  $("#pills").innerHTML = [`<a class="pill" href="#prep" data-pill="0">Prep</a>`]
+    .concat(DAYS.map((d, i) => `<a class="pill" href="#${d.id}" data-pill="${i + 1}">${d.label === "✈" ? "Fly" : "Day " + d.label}</a>`))
+    .join("");
+}
+
+function renderBudget() {
+  let lo = 0, hi = 0;
+  DAYS.forEach((d) => d.stops.forEach((s) => { if (s.costs) { lo += s.costs[0]; hi += s.costs[1]; } }));
+  const rows = [
+    { label: "HI Chicago Hostel, 4 nights", detail: "Twin Over Full private room: check your booking total", text: "TBD" },
+    { label: "Meals, café treats & snacks", detail: "Sum of every estimate on the timeline", lo, hi },
+    ...BUDGET_FIXED,
+  ];
+  const tLo = rows.reduce((a, r) => a + (r.lo || 0), 0);
+  const tHi = rows.reduce((a, r) => a + (r.hi || 0), 0);
+  const range = (r) => r.text || (r.lo === r.hi ? money(r.lo) : `${money(r.lo)} – ${money(r.hi)}`);
+  $("#budget-table").innerHTML = `<thead><tr><th scope="col">Category</th><th scope="col">Two people</th></tr></thead><tbody>
+    ${rows.map((r) => `<tr><td>${esc(r.label)}<small>${esc(r.detail)}</small></td><td>${range(r)}</td></tr>`).join("")}
+    <tr class="total"><td>Total before lodging<small>Excludes flights and shopping</small></td><td>${money(tLo)} – ${money(tHi)}</td></tr></tbody>`;
+  $("#stat-total").textContent = `${money(tLo)}–${(tHi / 1000).toFixed(1)}k`;
+  $("#stat-total").nextElementSibling.textContent = "for two, before lodging";
+
+  $("#credits").innerHTML = Object.keys(PHOTOS).map((k) => {
+    const p = PHOTOS[k];
+    return `<p><a href="${photoPage(k)}" target="_blank" rel="noopener">${esc(p.file.replace(/_/g, " ").replace(/\.(jpe?g|png)$/i, ""))}</a>, ${esc(p.by)}, ${esc(p.lic)}, via Wikimedia Commons</p>`;
+  }).join("");
+}
+
+/* ================================================================== */
+/*  Sky palette: time of day → colours + sun position                  */
+/*  One function feeds both the WebGL scene and the CSS fallback.      */
+/* ================================================================== */
+const SKY_KEYS = [
+  //  hour  top        mid        horizon    sun        elev°  fog
+  [0.0,  "#060516", "#130a26", "#2e1036", "#ff5fa2", -24, "#1a0b22"],
+  [5.6,  "#110d30", "#2c1545", "#6a2656", "#ff7fa0", -9,  "#2a1232"],
+  [6.9,  "#4b3a8a", "#d77fb2", "#ffc2a8", "#ffd3a8", 0,   "#c7839f"],
+  [9.0,  "#7f9fe0", "#e7bcd8", "#ffdfe6", "#fff4e6", 14,  "#e8bfd2"],
+  [12.3, "#86a8ea", "#eac4df", "#ffe6ec", "#fffaf2", 26,  "#ecc6d8"],
+  [14.8, "#a687cf", "#fbb4cf", "#ffd6b0", "#ffe7b8", 12,  "#efb0c6"],
+  [15.9, "#7e4fa6", "#ff86b6", "#ffb58c", "#ffd29a", 4,   "#e999b6"],
+  [16.4, "#523086", "#ff6fa3", "#ff9a76", "#ffb07a", 0,   "#d57a9c"],
+  [17.1, "#291a5c", "#b4447f", "#ff7a86", "#ff8a8a", -4.5,"#8e3f6c"],
+  [18.2, "#100b2e", "#2c1446", "#732456", "#ff5fa2", -12, "#3a1638"],
+  [24.0, "#060516", "#130a26", "#2e1036", "#ff5fa2", -24, "#1a0b22"],
+];
+const hex = (h) => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
+const SKY = SKY_KEYS.map((k) => ({ h: k[0], top: hex(k[1]), mid: hex(k[2]), hor: hex(k[3]), sun: hex(k[4]), el: k[5], fog: hex(k[6]) }));
+const mixA = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+const smooth = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+
+function skyAt(hour) {
+  const h = ((hour % 24) + 24) % 24;
+  let i = 0;
+  while (i < SKY.length - 2 && SKY[i + 1].h <= h) i++;
+  const a = SKY[i], b = SKY[i + 1];
+  const t = smooth(0, 1, (h - a.h) / (b.h - a.h));
+  const el = a.el + (b.el - a.el) * t;
+  // Azimuth: ~62° east of south at sunrise → ~58° west of south at sunset (late November).
+  const az = (-62 + (120 * (h - 6.9)) / (16.4 - 6.9)) * Math.PI / 180;
+  const er = el * Math.PI / 180;
+  return {
+    top: mixA(a.top, b.top, t), mid: mixA(a.mid, b.mid, t), hor: mixA(a.hor, b.hor, t),
+    sun: mixA(a.sun, b.sun, t), fog: mixA(a.fog, b.fog, t), el,
+    // world: x = north (screen right), z = east (toward camera), camera looks west
+    dir: [-Math.cos(az) * Math.cos(er), Math.sin(er), -Math.sin(az) * Math.cos(er)],
+    night: 1 - smooth(-7, 3, el),
+    stars: 1 - smooth(-13, -5, el),
+  };
+}
+const css = (c) => `rgb(${c.map((v) => Math.round(v * 255)).join(",")})`;
+
+/* ================================================================== */
+/*  3D skyline (Three.js r128, procedural, no assets)                  */
+/* ================================================================== */
+function createScene(canvas) {
+  const T = window.THREE;
+  if (!T) return null;
+  let renderer;
+  try {
+    renderer = new T.WebGLRenderer({ canvas, antialias: (window.devicePixelRatio || 1) < 2, powerPreference: "high-performance" });
+  } catch (e) { return null; }
+  if (!renderer.getContext()) return null;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+
+  const scene = new T.Scene();
+  const camera = new T.PerspectiveCamera(45, 1, 0.5, 2000);
+  const U = {
+    uTime: { value: 0 }, uNight: { value: 0 }, uStars: { value: 0 },
+    uSunDir: { value: new T.Vector3(0, 0.2, -1) }, uSunColor: { value: new T.Color() },
+    uTop: { value: new T.Color() }, uMid: { value: new T.Color() }, uHor: { value: new T.Color() }, uFog: { value: new T.Color() },
+  };
+  const HASH = `float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}`;
+
+  /* ---- Sky dome ---- */
+  const sky = new T.Mesh(new T.SphereGeometry(900, 48, 24), new T.ShaderMaterial({
+    uniforms: U, side: T.BackSide, depthWrite: false, fog: false,
+    vertexShader: `varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
+    fragmentShader: `uniform vec3 uTop,uMid,uHor,uSunColor,uSunDir; uniform float uStars,uTime; varying vec3 vDir;
+      float h3(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+      void main(){
+        vec3 d = normalize(vDir); float h = d.y;
+        vec3 col = mix(uMid, uTop, pow(smoothstep(0.0, 0.6, h), 0.75));
+        col = mix(uHor, col, smoothstep(-0.02, 0.22, h));
+        vec3 sd = normalize(uSunDir);
+        float s = max(dot(d, sd), 0.0);
+        float above = smoothstep(-0.12, 0.05, sd.y);
+        col += uSunColor * (pow(s, 6.0) * 0.28 + pow(s, 48.0) * 0.55) * above;
+        float disc = smoothstep(0.99955, 0.99975, s);
+        col = mix(col, vec3(1.0, 0.97, 0.9), disc * smoothstep(-0.01, 0.01, h));
+        if (uStars > 0.01) {
+          vec3 p = d * 260.0; vec3 ip = floor(p); vec3 f = fract(p) - 0.5;
+          float r = h3(ip);
+          float st = step(0.9965, r) * smoothstep(0.35, 0.0, length(f)) * smoothstep(0.03, 0.25, h);
+          col += vec3(1.0, 0.88, 0.96) * st * (0.55 + 0.45 * sin(uTime * 2.3 + r * 60.0)) * uStars;
+        }
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  }));
+  sky.renderOrder = -10;
+  scene.add(sky);
+
+  /* ---- Building shader: procedural windows, sun + sky lighting, fog ---- */
+  const BV = `varying vec3 vW; varying vec3 vN; varying float vSeed;
+    void main(){
+      mat4 m = modelMatrix;
+      #ifdef USE_INSTANCING
+        m = modelMatrix * instanceMatrix;
+      #endif
+      vec4 w = m * vec4(position, 1.0);
+      vW = w.xyz; vN = normalize(mat3(m) * normal);
+      vSeed = fract(sin(dot(m[3].xz, vec2(12.9898, 78.233))) * 43758.5453);
+      gl_Position = projectionMatrix * viewMatrix * w;
+    }`;
+  const BF = `uniform vec3 uBase,uSunColor,uSunDir,uTop,uHor,uFog; uniform float uNight,uTime,uGlass,uWin; varying vec3 vW; varying vec3 vN; varying float vSeed; ${HASH}
+    void main(){
+      vec3 n = normalize(vN); if (vW.y < 0.0) n.y = -n.y;
+      float y = abs(vW.y);
+      vec3 sd = normalize(uSunDir);
+      float sunUp = smoothstep(-0.06, 0.1, sd.y);
+      vec3 amb = mix(uHor * 0.30 + uTop * 0.10, uTop * 0.45 + uHor * 0.25, n.y * 0.5 + 0.5);
+      amb = mix(amb, amb * 0.45 + vec3(0.05, 0.02, 0.06), uNight);
+      float ndl = max(dot(n, normalize(vec3(sd.x, max(sd.y, 0.06), sd.z))), 0.0);
+      vec3 col = uBase * (amb + uSunColor * ndl * 0.85 * sunUp);
+      // glass reflects the sky it faces
+      float fr = pow(1.0 - abs(dot(n, normalize(cameraPosition - vW))), 2.0);
+      col += uGlass * mix(uHor, uTop, 0.4) * (0.18 + 0.35 * fr) * (1.0 - 0.7 * uNight);
+      if (abs(n.y) < 0.5 && uWin > 0.0) {
+        float along = abs(n.z) > abs(n.x) ? vW.x : vW.z;
+        vec2 g = vec2(along / 0.62, y / 0.72);
+        vec2 cell = floor(g); vec2 f = fract(g);
+        float win = step(0.2, f.x) * step(f.x, 0.8) * step(0.22, f.y) * step(f.y, 0.78) * step(0.9, y);
+        float hsh = hash(cell + vSeed * 97.0);
+        float lit = step(1.0 - uNight * uWin, hsh);
+        vec3 wc = mix(vec3(1.0, 0.80, 0.58), vec3(1.0, 0.62, 0.82), hash(cell.yx + 3.7));
+        col = mix(col, col * 0.75 + uGlass * uTop * 0.1, win * 0.35 * (1.0 - uNight));
+        col += wc * win * lit * (0.85 + 0.15 * sin(uTime * 0.7 + hsh * 40.0)) * uNight * 1.05;
+      }
+      float dist = length(vW - cameraPosition);
+      col = mix(col, uFog, smoothstep(90.0, 420.0, dist));
+      gl_FragColor = vec4(col, 1.0);
+    }`;
+  const mat = (base, glass = 0, win = 0.55) => new T.ShaderMaterial({
+    uniforms: Object.assign({}, U, { uBase: { value: new T.Color(base) }, uGlass: { value: glass }, uWin: { value: win } }),
+    vertexShader: BV, fragmentShader: BF,
+  });
+  const M = {
+    filler: mat("#b7a2b8", 0.25, 0.36), fillerWarm: mat("#c9a89f", 0.1, 0.32), dark: mat("#3a3140", 0.35, 0.42),
+    white: mat("#efe6ef", 0.05, 0.34), glass: mat("#9fb0d6", 1.0, 0.32), stone: mat("#e3d6c6", 0, 0),
+    red: mat("#d6344f", 0, 0), roof: mat("#3a8f6e", 0, 0), concrete: mat("#cfc4cf", 0.1, 0.5),
+  };
+
+  const city = new T.Group();
+  scene.add(city);
+  const box = new T.BoxGeometry(1, 1, 1); box.translate(0, 0.5, 0);
+  const add = (geo, material, x, y, z, sx = 1, sy = 1, sz = 1, ry = 0) => {
+    const m = new T.Mesh(geo, material); m.position.set(x, y, z); m.scale.set(sx, sy, sz); m.rotation.y = ry; city.add(m); return m;
+  };
+  const beacons = [];
+  const beaconMat = new T.MeshBasicMaterial({ color: 0xff3355 });
+  const beaconGeo = new T.SphereGeometry(0.22, 8, 6);
+  const antenna = (x, y, z, h, r = 0.12) => {
+    add(new T.CylinderGeometry(r * 0.5, r, h, 6), M.white, x, y + h / 2, z);
+    const b = new T.Mesh(beaconGeo, beaconMat); b.position.set(x, y + h + 0.1, z); city.add(b); beacons.push(b);
+  };
+
+  // Willis Tower — nine bundled tubes ending at floors 50/66/90/108 (1 unit ≈ 10 m)
+  const W = { x: -10, z: -8 }, s = 2.3, fl = 44 / 108;
+  const tubes = { "1,-1": 50, "-1,1": 50, "1,1": 66, "-1,-1": 66, "0,-1": 108, "0,0": 108, "1,0": 90, "-1,0": 90, "0,1": 90 };
+  Object.keys(tubes).forEach((k) => { const [i, j] = k.split(",").map(Number); add(box, M.dark, W.x + i * s, 0, W.z + j * s, s, tubes[k] * fl, s); });
+  antenna(W.x - 0.5, 44, W.z - 1.2, 8.5); antenna(W.x + 0.5, 44, W.z - 1.2, 7.5);
+
+  // 875 N Michigan (Hancock) — tapered square prism, twin masts
+  const hk = add(new T.CylinderGeometry(2.1, 3.6, 34.4, 4, 1), M.dark, 26, 17.2, -3, 1, 1, 1, Math.PI / 4);
+  antenna(25.3, 34.4, -3, 10, 0.14); antenna(26.8, 34.4, -3, 10, 0.14);
+  // Trump Tower — stepped glass by the river, spire
+  add(box, M.glass, 10, 0, -1, 5.2, 13, 4.2); add(box, M.glass, 10, 13, -1, 4.2, 12, 3.6); add(box, M.glass, 10, 25, -1, 3.2, 10, 2.8);
+  add(new T.CylinderGeometry(0.1, 0.35, 7, 6), M.white, 10, 38.5, -1);
+  // Aon Center — tall white box
+  add(box, M.white, 2, 0, 3, 5.6, 34.6, 5.6);
+  // St. Regis — three stacked glass volumes
+  add(box, M.glass, 5.2, 0, 7, 2.6, 36, 3); add(box, M.glass, 7.4, 0, 7.4, 2.2, 31, 2.8); add(box, M.glass, 3.4, 0, 7.6, 2, 26, 2.6);
+  // Marina City — corncobs
+  [[7.5, -4.4], [7.5, -7.8]].forEach(([x, z]) => add(new T.CylinderGeometry(1.6, 1.6, 18, 18), M.concrete, x, 9, z));
+  // Two Prudential — pointed crown
+  add(box, M.filler, 0.5, 0, -2.2, 3.4, 28, 3.4); add(new T.ConeGeometry(2.4, 5, 4), M.filler, 0.5, 30.5, -2.2, 1, 1, 1, Math.PI / 4);
+
+  // Museum Campus: Field Museum + Shedd Aquarium (low, classical, pale stone)
+  add(box, M.stone, -20, 0, 2, 8, 2.8, 4); add(box, M.stone, -20, 2.8, 2, 3, 1.2, 2.6);
+  add(new T.CylinderGeometry(3.2, 3.4, 2.4, 8), M.stone, -24, 1.2, 10); add(new T.SphereGeometry(1.4, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), M.stone, -24, 2.4, 10);
+
+  // Chinatown gate + pagoda roof
+  const gate = new T.Group(); gate.position.set(-34, 0, -14); city.add(gate);
+  [[-1.3, 0], [1.3, 0]].forEach(([x]) => { const p = new T.Mesh(box, M.red); p.position.set(x, 0, 0); p.scale.set(0.35, 3.2, 0.35); gate.add(p); });
+  const r1 = new T.Mesh(box, M.roof); r1.position.set(0, 3.2, 0); r1.scale.set(3.8, 0.35, 0.9); gate.add(r1);
+  const r2 = new T.Mesh(box, M.roof); r2.position.set(0, 3.9, 0); r2.scale.set(2.4, 0.3, 0.7); gate.add(r2);
+  const pag = new T.Group(); pag.position.set(-37, 0, -18); city.add(pag);
+  for (let i = 0; i < 4; i++) {
+    const b = new T.Mesh(box, M.red); b.position.y = i * 1.4; b.scale.set(2.2 - i * 0.4, 1.1, 2.2 - i * 0.4); pag.add(b);
+    const rf = new T.Mesh(new T.ConeGeometry(1.9 - i * 0.35, 0.5, 4), M.roof); rf.position.y = i * 1.4 + 1.3; rf.rotation.y = Math.PI / 4; pag.add(rf);
+  }
+
+  // Daley Plaza Christmas tree
+  const treeMat = new T.MeshBasicMaterial({ color: 0x0f3b2a });
+  const tree = new T.Mesh(new T.ConeGeometry(1.4, 5, 10), treeMat); tree.position.set(-4.5, 2.5, -4.5); city.add(tree);
+
+  // Filler blocks — one InstancedMesh, clustered on the Loop and the Gold Coast
+  const rnd = (() => { let a = 1337; return () => ((a = (a * 16807) % 2147483647) / 2147483647); })();
+  const keep = [[W.x, W.z, 6], [26, -3, 5], [10, -1, 4], [2, 3, 4.5], [5.5, 7.3, 3.5], [7.5, -6, 3.2], [0.5, -2.2, 3], [-20, 2, 5.5], [-24, 10, 5], [-34, -14, 3], [-37, -18, 3], [-4.5, -4.5, 2.4]];
+  const place = [];
+  for (let n = 0; n < 900 && place.length < 280; n++) {
+    const x = -48 + rnd() * 96, z = -70 + rnd() * 72;
+    if (x > 4.3 && x < 5.9 && z < 5) continue;               // main branch of the river
+    if (x < -14 && x > -30 && z > -4) continue;                // Grant Park / Museum Campus lawn
+    if (x > -9 && x < -1 && z > -1 && z < 5) continue;         // Millennium Park
+    if (keep.some(([kx, kz, r]) => (x - kx) ** 2 + (z - kz) ** 2 < r * r)) continue;
+    if (place.some((p) => Math.abs(p[0] - x) < 2.4 && Math.abs(p[1] - z) < 2.4)) continue;
+    const loop = Math.exp(-((x + 2) ** 2) / (2 * 13 ** 2) - ((z + 6) ** 2) / (2 * 12 ** 2));
+    const gold = Math.exp(-((x - 22) ** 2) / (2 * 8 ** 2) - ((z + 4) ** 2) / (2 * 8 ** 2));
+    const hgt = 2 + rnd() ** 1.6 * (4 + 26 * Math.max(loop, gold * 0.8)) + 2 * Math.max(loop, gold);
+    place.push([x, z, 1.4 + rnd() * 1.4, hgt, 1.4 + rnd() * 1.4]);
+  }
+  const split = [place.filter((_, i) => i % 3), place.filter((_, i) => !(i % 3))];
+  [M.filler, M.fillerWarm].forEach((m, k) => {
+    const list = split[k];
+    const inst = new T.InstancedMesh(box, m, list.length);
+    const o = new T.Object3D();
+    list.forEach(([x, z, w, h, d], i) => { o.position.set(x, 0, z); o.scale.set(w, h, d); o.updateMatrix(); inst.setMatrixAt(i, o.matrix); });
+    city.add(inst);
+  });
+
+  // Ground, river, lake
+  const ground = new T.Mesh(new T.PlaneGeometry(1600, 1000), new T.ShaderMaterial({
+    uniforms: U, vertexShader: `varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }`,
+    fragmentShader: `uniform vec3 uFog,uHor,uSunColor,uSunDir; uniform float uNight; varying vec3 vW;
+      void main(){
+        vec3 c = mix(vec3(0.20,0.14,0.19)+uHor*0.12, vec3(0.06,0.03,0.06), uNight);
+        vec3 v = normalize(vW - cameraPosition); float d = length(vW - cameraPosition);
+        vec3 sd = normalize(uSunDir); float s = max(dot(normalize(vec3(v.x, 0.0, v.z)), normalize(vec3(sd.x, 0.0, sd.z))), 0.0);
+        vec3 haze = uHor + uSunColor * (pow(s, 6.0) * 0.28 + pow(s, 48.0) * 0.55) * smoothstep(-0.12, 0.05, sd.y) * (1.0 - smoothstep(0.0, 0.3, abs(sd.y)) * 0.6);
+        c = mix(c, uFog, smoothstep(60.0, 300.0, d));
+        gl_FragColor = vec4(mix(c, haze, smoothstep(220.0, 950.0, d)), 1.0);
+      } `,
+  }));
+  ground.rotation.x = -Math.PI / 2; ground.position.set(0, 0, 6 - 500); scene.add(ground);
+
+  // Street lights: warm points along the grid, on at night
+  const pts = [];
+  for (let x = -46; x <= 44; x += 3) for (let z = -66; z <= 4; z += 1.5) if (rnd() < 0.55) pts.push(x + rnd() * 0.4, 0.25, z);
+  for (let z = -66; z <= 4; z += 3) for (let x = -46; x <= 44; x += 1.5) if (rnd() < 0.35) pts.push(x, 0.25, z + rnd() * 0.4);
+  const lg = new T.BufferGeometry(); lg.setAttribute("position", new T.Float32BufferAttribute(pts, 3));
+  const lightMat = new T.PointsMaterial({ color: 0xffb98a, size: 0.42, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending });
+  city.add(new T.Points(lg, lightMat));
+  // Tree lights
+  const tl = []; for (let i = 0; i < 70; i++) { const a = i * 2.4, yy = (i / 70) * 4.6, r = 1.35 * (1 - yy / 5); tl.push(-4.5 + Math.cos(a) * r, 0.2 + yy, -4.5 + Math.sin(a) * r); }
+  const tg = new T.BufferGeometry(); tg.setAttribute("position", new T.Float32BufferAttribute(tl, 3));
+  const treeLights = new T.PointsMaterial({ color: 0xffd1e6, size: 0.32, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending });
+  city.add(new T.Points(tg, treeLights));
+
+  // Navy Pier + Ferris wheel (turns, lights up pink)
+  add(box, M.stone, 16, 0, 26, 3.2, 0.9, 40);
+  const wheel = new T.Group(); wheel.position.set(16, 6.2, 18); wheel.rotation.y = 0.55; scene.add(wheel);
+  const wheelMat = new T.MeshBasicMaterial({ color: 0xffffff });
+  const rim = new T.Mesh(new T.TorusGeometry(4.8, 0.09, 6, 64), wheelMat); wheel.add(rim);
+  const sp = []; for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2; sp.push(0, 0, 0, Math.cos(a) * 4.8, Math.sin(a) * 4.8, 0); }
+  const sg = new T.BufferGeometry(); sg.setAttribute("position", new T.Float32BufferAttribute(sp, 3));
+  const spokes = new T.LineSegments(sg, new T.LineBasicMaterial({ color: 0xffc4dd, transparent: true, opacity: 0.8 })); wheel.add(spokes);
+  const bulbs = []; for (let i = 0; i < 40; i++) { const a = (i / 40) * Math.PI * 2; bulbs.push(Math.cos(a) * 4.8, Math.sin(a) * 4.8, 0); }
+  const bg = new T.BufferGeometry(); bg.setAttribute("position", new T.Float32BufferAttribute(bulbs, 3));
+  const bulbMat = new T.PointsMaterial({ color: 0xff5fa2, size: 0.5, transparent: true, opacity: 0.2, depthWrite: false, blending: T.AdditiveBlending });
+  wheel.add(new T.Points(bg, bulbMat));
+  add(box, M.white, 16, 0, 18, 0.25, 1.6, 0.25);
+
+  // Mirror image for the lake reflection (drawn under a translucent water sheet)
+  const mirror = city.clone(); mirror.scale.y = -1; scene.add(mirror);
+  mirror.traverse((o) => { if (o.material === beaconMat) beacons.push(o); });
+  const wheelMirror = wheel.clone(); wheelMirror.position.y = -wheel.position.y; wheelMirror.scale.y = -1; scene.add(wheelMirror);
+
+  const water = new T.Mesh(new T.PlaneGeometry(2400, 1200), new T.ShaderMaterial({
+    uniforms: U, transparent: true, depthWrite: false,
+    vertexShader: `varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }`,
+    fragmentShader: `uniform vec3 uTop,uMid,uHor,uSunColor,uSunDir,uFog; uniform float uTime,uNight; varying vec3 vW;
+      void main(){
+        vec3 v = normalize(vW - cameraPosition); vec2 p = vW.xz; float t = uTime;
+        float n1 = sin(p.x*0.42 + t*0.8) + sin(p.y*0.61 - t*1.1 + p.x*0.13);
+        float n2 = sin((p.x + p.y)*1.3 + t*1.9) * 0.5 + sin(p.x*2.1 - p.y*1.7 - t*2.4) * 0.35;
+        vec3 nrm = normalize(vec3((n1*0.5 + n2)*0.045, 1.0, cos(p.y*0.5 + t*0.9)*0.04 + n2*0.03));
+        vec3 r = reflect(v, nrm);
+        vec3 skyR = mix(uHor, mix(uMid, uTop, smoothstep(0.2, 0.7, r.y)), smoothstep(0.0, 0.25, r.y));
+        vec3 sd = normalize(uSunDir);
+        float glint = pow(max(dot(r, sd), 0.0), 90.0) * smoothstep(-0.05, 0.04, sd.y);
+        float fres = pow(1.0 - clamp(-v.y, 0.0, 1.0), 5.0);
+        vec3 deep = mix(vec3(0.16, 0.06, 0.14) + uMid*0.08, vec3(0.03, 0.01, 0.04), uNight);
+        vec3 col = mix(deep, skyR, 0.28 + 0.6*fres) + uSunColor * glint * 1.6;
+        float dist = length(vW - cameraPosition);
+        col = mix(col, uFog, smoothstep(160.0, 700.0, dist) * 0.9);
+        float a = mix(0.9, 0.52, fres) + glint;
+        gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
+      }`,
+  }));
+  water.rotation.x = -Math.PI / 2; water.position.set(0, 0, 6 + 600); water.renderOrder = 5; scene.add(water);
+
+  /* ---- Camera shots ---- */
+  const V = (x, y, z) => new T.Vector3(x, y, z);
+  const SHOTS = {
+    wide:      [V(0, 17, 104),  V(0, 15, -2)],
+    river:     [V(12, 7, 50),   V(4, 13, -6)],
+    museum:    [V(-44, 11, 50), V(-18, 5, 0)],
+    willis:    [V(-30, 18, 42), V(-10, 26, -8)],
+    park:      [V(-10, 11, 54), V(-2, 12, -2)],
+    mile:      [V(30, 13, 56),  V(16, 16, -2)],
+    hancock:   [V(40, 18, 44),  V(24, 24, -4)],
+    chinatown: [V(-50, 12, 30), V(-34, 5, -15)],
+    daley:     [V(6, 9, 44),    V(-4, 9, -6)],
+    air:       [V(18, 82, 150), V(0, 2, -22)],
+  };
+  let shot = "wide";
+  const camPos = SHOTS.wide[0].clone(), camTgt = SHOTS.wide[1].clone();
+  const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
+  let w = 0, h = 0, aspect = 1;
+
+  function resize() {
+    w = window.innerWidth; h = window.innerHeight; aspect = w / h;
+    renderer.setSize(w, h, false);
+    camera.aspect = aspect; camera.fov = aspect < 0.8 ? 62 : aspect < 1.2 ? 52 : 45; camera.updateProjectionMatrix();
+  }
+  resize();
+
+  const tmp = new T.Vector3();
+  function frame(dt, time, sk, snap) {
+    U.uTime.value = time;
+    U.uTop.value.setRGB(...sk.top); U.uMid.value.setRGB(...sk.mid); U.uHor.value.setRGB(...sk.hor);
+    U.uFog.value.setRGB(...sk.fog); U.uSunColor.value.setRGB(...sk.sun); U.uSunDir.value.set(...sk.dir);
+    U.uNight.value = sk.night; U.uStars.value = sk.stars;
+    lightMat.opacity = sk.night * 0.95; treeLights.opacity = sk.night;
+    bulbMat.opacity = 0.25 + sk.night * 0.75;
+    wheelMat.color.setRGB(1, 0.75 + 0.25 * (1 - sk.night), 0.85 + 0.15 * (1 - sk.night));
+    wheel.rotation.z -= dt * 0.12; wheelMirror.rotation.z = wheel.rotation.z;
+    const blink = sk.night > 0.3 && (time % 1.6) < 0.8;
+    beacons.forEach((b) => (b.visible = blink));
+
+    const k = snap ? 1 : 1 - Math.exp(-dt * 1.6);
+    const [p, t] = SHOTS[shot];
+    camPos.lerp(p, k); camTgt.lerp(t, k);
+    pointer.sx += (pointer.x - pointer.sx) * (snap ? 1 : 1 - Math.exp(-dt * 3));
+    pointer.sy += (pointer.y - pointer.sy) * (snap ? 1 : 1 - Math.exp(-dt * 3));
+    const pull = aspect < 1 ? 1.35 : 1;
+    tmp.copy(camPos).sub(camTgt).multiplyScalar(pull).add(camTgt);
+    camera.position.set(tmp.x + pointer.sx * 3 + (reduceMotion ? 0 : Math.sin(time * 0.07) * 1.5), tmp.y - pointer.sy * 1.6, tmp.z);
+    camera.lookAt(camTgt);
+    renderer.render(scene, camera);
+  }
+
+  return {
+    resize, frame,
+    setShot(name) { if (SHOTS[name]) shot = name; },
+    setPointer(x, y) { pointer.x = x; pointer.y = y; },
+  };
+}
+
+/* ================================================================== */
+/*  2D particles: soft snow (< 120) + fireworks                        */
+/* ================================================================== */
+function createFX(canvas) {
+  const ctx = canvas.getContext("2d");
+  let W = 0, H = 0, dpr = 1;
+  const flakes = [], sparks = [], rockets = [];
+  const COUNT = () => (window.innerWidth < 700 ? 60 : 110);
+  const pointer = { x: -1e4, y: -1e4 };
+  let snow = !reduceMotion;
+  let raf = 0, last = 0;
+
+  const sprite = document.createElement("canvas"); sprite.width = sprite.height = 32;
+  { const g = sprite.getContext("2d"); const gr = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.35, "rgba(255,236,246,.8)"); gr.addColorStop(1, "rgba(255,220,238,0)");
+    g.fillStyle = gr; g.fillRect(0, 0, 32, 32); }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2); W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    while (flakes.length < COUNT()) flakes.push(newFlake(true));
+    flakes.length = COUNT();
+  }
+  function newFlake(anywhere) {
+    const z = Math.random();
+    return { x: Math.random() * W, y: anywhere ? Math.random() * H : -10, r: 0.8 + z * 2.6, vy: 12 + z * 34, ph: Math.random() * 6.28, a: 0.25 + z * 0.55, px: 0 };
+  }
+
+  const PALETTES = [["#ff5fa2", "#ffc4dd", "#ffffff"], ["#ffb38a", "#ffd9bf", "#ff8cc6"], ["#c084fc", "#f0abfc", "#ffffff"], ["#fda4af", "#ff5fa2", "#fde68a"]];
+  function burst(x, y) {
+    const pal = PALETTES[(Math.random() * PALETTES.length) | 0];
+    const heart = Math.random() < 0.3;
+    const n = heart ? 90 : 70;
+    for (let i = 0; i < n && sparks.length < 900; i++) {
+      const a = (i / n) * Math.PI * 2;
+      let vx, vy;
+      if (heart) { // x = 16 sin³t, y = 13 cos t − 5 cos 2t − 2 cos 3t − cos 4t
+        vx = 16 * Math.sin(a) ** 3 * 9; vy = -(13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * 9;
+      } else { const sp = 120 + Math.random() * 150; vx = Math.cos(a) * sp; vy = Math.sin(a) * sp; }
+      sparks.push({ x, y, vx, vy, life: 1, decay: 0.45 + Math.random() * 0.35, c: pal[i % pal.length], r: 1.2 + Math.random() * 1.4 });
+    }
+  }
+  function launch(x, y) {
+    if (reduceMotion) return;
+    const tx = x ?? W * (0.2 + Math.random() * 0.6), ty = y ?? H * (0.12 + Math.random() * 0.3);
+    rockets.push({ x: tx + (Math.random() - 0.5) * 60, y: H + 10, tx, ty, v: 0 });
+    wake();
+  }
+  function volley(n = 5) { for (let i = 0; i < n; i++) setTimeout(() => launch(), i * 380); }
+
+  function step(now) {
+    raf = 0;
+    const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
+    ctx.clearRect(0, 0, W, H);
+    if (snow) {
+      const t = now / 1000;
+      for (const f of flakes) {
+        f.y += f.vy * dt; f.x += Math.sin(t * 0.6 + f.ph) * 10 * dt + 4 * dt;
+        const dx = f.x - pointer.x, dy = f.y - pointer.y, d2 = dx * dx + dy * dy;
+        if (d2 < 14400) { const d = Math.sqrt(d2) || 1, push = (1 - d / 120) * 90 * dt; f.x += (dx / d) * push; f.y += (dy / d) * push; }
+        if (f.y > H + 10) Object.assign(f, newFlake(false));
+        if (f.x > W + 10) f.x = -10; else if (f.x < -10) f.x = W + 10;
+        ctx.globalAlpha = f.a; const s = f.r * 4; ctx.drawImage(sprite, f.x - s / 2, f.y - s / 2, s, s);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (rockets.length || sparks.length) {
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = rockets.length - 1; i >= 0; i--) {
+        const r = rockets[i]; r.v += 900 * dt;
+        const ny = r.y - Math.max(260, 900 - r.v) * dt; r.x += (r.tx - r.x) * 2 * dt;
+        ctx.strokeStyle = "rgba(255,210,230,.8)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(r.x, ny + 14); ctx.stroke();
+        r.y = ny;
+        if (r.y <= r.ty) { burst(r.x, r.y); rockets.splice(i, 1); }
+      }
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.vx *= 1 - 1.6 * dt; s.vy = s.vy * (1 - 1.6 * dt) + 110 * dt;
+        s.x += s.vx * dt; s.y += s.vy * dt; s.life -= s.decay * dt;
+        if (s.life <= 0) { sparks.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.min(1, s.life * 1.3); ctx.fillStyle = s.c;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (0.6 + s.life * 0.6), 0, 6.283); ctx.fill();
+      }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+    }
+    if (snow || rockets.length || sparks.length) wake();
+  }
+  function wake() { if (!raf && !document.hidden) raf = requestAnimationFrame(step); }
+
+  resize();
+  window.addEventListener("pointermove", (e) => { pointer.x = e.clientX; pointer.y = e.clientY; }, { passive: true });
+  document.addEventListener("pointerleave", () => { pointer.x = pointer.y = -1e4; });
+  document.addEventListener("visibilitychange", () => { last = performance.now(); wake(); });
+  wake();
+  return {
+    resize, launch, volley,
+    setSnow(on) { snow = on; if (!on) ctx.clearRect(0, 0, W, H); wake(); },
+    get snow() { return snow; },
+  };
+}
+
+/* ================================================================== */
+/*  Controller: scroll → progress line, milestone activation, time     */
+/* ================================================================== */
+function main() {
+  renderPrep(); renderTimeline(); renderBudget();
+
+  const fill = $("#fill"), timeline = $("#timeline");
+  const items = [...document.querySelectorAll(".tl-item")];
+  const pills = [...document.querySelectorAll(".pill")];
+  const clockDay = $("#clock-day"), clockTime = $("#clock-time");
+  const DATES = ["Thu · Nov 26", "Fri · Nov 27", "Sat · Nov 28", "Sun · Nov 29", "Mon · Nov 30"];
+
+  const fx = createFX($("#fx"));
+  const scene = createScene($("#scene"));
+  if (scene) $("#sky-fallback").style.display = "none";
+
+  let marks = [], trackTop = 0, trackH = 1;
+  function measure() {
+    const sy = window.scrollY;
+    const r = timeline.getBoundingClientRect();
+    trackTop = r.top + sy; trackH = Math.max(1, r.height);
+    marks = items.map((li) => {
+      const anchor = li.querySelector(".dot, .badge").getBoundingClientRect();
+      return anchor.top + anchor.height / 2 + sy - trackTop;
+    });
+    update(true);
+  }
+
+  // Hero + prep: golden hour on Thanksgiving, wide shot.
+  let targetT = 15.8, curT = 15.8, active = -2, current = { cam: "wide", index: 0 };
+  function update() {
+    const tip = window.scrollY + window.innerHeight * 0.62 - trackTop;
+    fill.style.setProperty("--p", Math.min(1, Math.max(0, tip / trackH)).toFixed(4));
+    let last = -1;
+    for (let i = 0; i < items.length; i++) {
+      const on = marks[i] <= tip;
+      if (on) last = i;
+      if (items[i]._on !== on) { items[i]._on = on; items[i].classList.toggle("is-active", on); }
+    }
+    if (last !== active) {
+      active = last;
+      if (last < 0) { targetT = 15.8; current = { cam: "wide", index: 0 }; }
+      else {
+        const li = items[last];
+        targetT = +li.dataset.day * 24 + +li.dataset.hour;
+        current = { cam: li.dataset.cam, index: +li.dataset.index };
+        if (li.hasAttribute("data-fireworks") && !li._fired) { li._fired = true; fx.volley(6); }
+      }
+      if (scene) scene.setShot(current.cam);
+      pills.forEach((p) => p.setAttribute("aria-current", String(+p.dataset.pill === current.index)));
+      kick();
+    }
+  }
+
+  // Seen-class for browsers without view timelines
+  if (!CSS.supports("animation-timeline: view()") && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-seen"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
+    items.forEach((li) => io.observe(li));
+  }
+
+  let ticking = false;
+  window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
+  window.addEventListener("resize", () => { fx.resize(); scene && scene.resize(); measure(); });
+  const ro = new ResizeObserver(() => measure()); ro.observe($("#tl")); ro.observe(document.body);
+
+  window.addEventListener("pointermove", (e) => {
+    if (scene && finePointer && !reduceMotion) scene.setPointer(e.clientX / window.innerWidth - 0.5, e.clientY / window.innerHeight - 0.5);
+  }, { passive: true });
+
+  // Card tilt (desktop only)
+  if (finePointer && !reduceMotion) {
+    document.addEventListener("pointermove", (e) => {
+      const c = e.target.closest && e.target.closest(".card");
+      if (!c) return;
+      const r = c.getBoundingClientRect();
+      c.style.setProperty("--ry", (((e.clientX - r.left) / r.width - 0.5) * 5).toFixed(2) + "deg");
+      c.style.setProperty("--rx", (-((e.clientY - r.top) / r.height - 0.5) * 4).toFixed(2) + "deg");
+    }, { passive: true });
+    document.addEventListener("pointerout", (e) => {
+      const c = e.target.closest && e.target.closest(".card");
+      if (c && !c.contains(e.relatedTarget)) { c.style.removeProperty("--rx"); c.style.removeProperty("--ry"); }
+    });
+  }
+
+  // Buttons + click-to-launch on open sky
+  const snowBtn = $("#snow-btn");
+  snowBtn.setAttribute("aria-pressed", String(fx.snow));
+  snowBtn.addEventListener("click", () => { fx.setSnow(!fx.snow); snowBtn.setAttribute("aria-pressed", String(fx.snow)); });
+  $("#fw-btn").addEventListener("click", () => fx.volley(4));
+  $("#finale-btn").addEventListener("click", () => fx.volley(10));
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("a, button, .card, .panel, .topbar, .hero-inner, .wrap")) return;
+    fx.launch(e.clientX, e.clientY);
+  });
+
+  // Time + render loop. Runs only while something is moving.
+  let raf = 0, lastNow = performance.now(), lastLabel = "", lastAuto = 0;
+  function kick() { if (!raf && !document.hidden) { lastNow = performance.now(); raf = requestAnimationFrame(loop); } }
+  function loop(now) {
+    raf = 0;
+    const dt = Math.min(0.05, (now - lastNow) / 1000); lastNow = now;
+    const snap = reduceMotion;
+    const gap = Math.abs(targetT - curT);
+    curT = snap ? targetT : curT + (targetT - curT) * (1 - Math.exp(-dt * (1.8 + gap / 5)));
+    if (Math.abs(targetT - curT) < 0.002) curT = targetT;
+    const sk = skyAt(curT);
+    if (scene) scene.frame(dt, now / 1000, sk, snap);
+    else {
+      const s = $("#sky-fallback").style;
+      s.setProperty("--fb-top", css(sk.top)); s.setProperty("--fb-mid", css(sk.mid)); s.setProperty("--fb-hor", css(sk.hor));
+    }
+    // Clock label follows the simulated time
+    const dayIdx = Math.max(0, Math.min(4, Math.floor(curT / 24)));
+    const hr = ((curT % 24) + 24) % 24, H = Math.floor(hr), Mi = Math.floor((hr - H) * 60 / 5) * 5;
+    const label = `${DATES[dayIdx]}|${((H + 11) % 12) + 1}:${String(Mi).padStart(2, "0")} ${H < 12 ? "AM" : "PM"}`;
+    if (label !== lastLabel) { lastLabel = label; const [d, t] = label.split("|"); clockDay.textContent = d; clockTime.textContent = t; }
+    // Night-time fireworks over the lake on the last evening
+    if (!reduceMotion && sk.night > 0.9 && current.index === 4 && now - lastAuto > 2600) { lastAuto = now + Math.random() * 1800; fx.launch(); }
+    if (!reduceMotion || curT !== targetT) kick();
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) kick(); });
+
+  measure();
+  kick();
+  // Images change card heights as they arrive
+  window.addEventListener("load", measure);
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", main);
+else main();
+</script>
+</body>
+</html>

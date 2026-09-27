@@ -49,7 +49,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               src={project.demoEmbed}
               title={project.title}
               repo={project.repo}
-              detailsId={project.slug}
+              detailsId={project.stageOnly ? undefined : project.slug}
+              clearNav={project.stageOnly}
             />
             <div className="shell pt-4">
               <BackLink />
@@ -61,7 +62,12 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           </div>
         )}
 
-        <ProjectShowcase project={project} index={0} titleAs="h1" />
+        {project.stageOnly ? (
+          // Stage-only projects have no write-up, so the page still needs an h1.
+          <h1 className="sr-only">{project.title}</h1>
+        ) : (
+          <ProjectShowcase project={project} index={0} titleAs="h1" />
+        )}
       </main>
 
       <SiteFooter id="contact" />

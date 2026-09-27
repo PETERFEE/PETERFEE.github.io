@@ -3,9 +3,14 @@ import { withBasePath } from "@/lib/paths";
 export interface DemoStageProps {
   src: string;
   title: string;
-  repo: string;
-  /** Element id of the write-up, used by the jump button. */
-  detailsId: string;
+  repo?: string;
+  /** Element id of the write-up, used by the jump button. Omit when there is none. */
+  detailsId?: string;
+  /**
+   * Start the frame below the fixed site nav instead of under it. For demos
+   * with their own top bar, which would otherwise sit beneath the nav links.
+   */
+  clearNav?: boolean;
 }
 
 /**
@@ -24,13 +29,15 @@ export interface DemoStageProps {
  *
  * No hooks, so this stays a server component and ships no JavaScript.
  */
-export function DemoStage({ src, title, repo, detailsId }: DemoStageProps) {
+export function DemoStage({ src, title, repo, detailsId, clearNav = false }: DemoStageProps) {
   const resolved = withBasePath(src);
 
   return (
     <section
       aria-label={`${title} — interactive demo`}
-      className="flex h-screen w-full flex-col bg-black supports-[height:100svh]:h-[100svh]"
+      className={`flex h-screen w-full flex-col bg-black supports-[height:100svh]:h-[100svh]${
+        clearNav ? " pt-16 md:pt-[4.5rem]" : ""
+      }`}
     >
       <iframe
         src={resolved}
@@ -45,18 +52,22 @@ export function DemoStage({ src, title, repo, detailsId }: DemoStageProps) {
 
       <div className="shrink-0 border-t border-ink-700 bg-ink-950 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3.5">
         <div className="shell flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-          <a href={`#${detailsId}`} className="btn-brand">
-            Read the write-up
-            <span aria-hidden>↓</span>
-          </a>
+          {detailsId ? (
+            <a href={`#${detailsId}`} className="btn-brand">
+              Read the write-up
+              <span aria-hidden>↓</span>
+            </a>
+          ) : null}
           <a href={resolved} target="_blank" rel="noreferrer" className="btn-glass">
             Full screen
             <span aria-hidden>↗</span>
           </a>
-          <a href={repo} target="_blank" rel="noreferrer" className="btn-glass">
-            Source
-            <span aria-hidden>↗</span>
-          </a>
+          {repo ? (
+            <a href={repo} target="_blank" rel="noreferrer" className="btn-glass">
+              Source
+              <span aria-hidden>↗</span>
+            </a>
+          ) : null}
         </div>
       </div>
     </section>

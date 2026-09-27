@@ -138,6 +138,17 @@ export const gallery: GalleryItem[] = [
     badge: "Live demo",
   },
   {
+    slug: "chicago-trip",
+    title: "Chicago, Four Days at Sunset",
+    blurb: "A scroll-driven trip timeline over a live 3D skyline",
+    tag: "WebGL",
+    accent: "amber",
+    href: "/projects/chicago-trip/",
+    internal: true,
+    image: "/projects/chicago-trip/cover.jpg",
+    badge: "Live page",
+  },
+  {
     slug: "sv-tutorial",
     title: "SystemVerilog Tutorial",
     blurb: "Working through Greg Stitt's UF SystemVerilog course material",

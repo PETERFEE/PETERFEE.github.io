@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { EASE, Reveal, useReducedMotion } from "@/components/motion";
 import { ProjectMedia, accentTheme } from "@/components/project-media";
+import { withBasePath } from "@/lib/paths";
 import type { Project, ProjectMediaSlot } from "@/types/project";
 
 function cx(...parts: Array<string | false | null | undefined>): string {
@@ -138,10 +139,12 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           {/* mt-auto pins the link to the bottom so cards in a row line up. */}
           <div className="mt-auto pt-6">
             <a
-              href={project.repo}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`View repository: ${project.title}`}
+              // A stage-only project IS its live page, so the card opens that
+              // page in place instead of sending people to the source.
+              href={project.stageOnly ? withBasePath(`/projects/${project.slug}/`) : project.repo}
+              target={project.stageOnly ? undefined : "_blank"}
+              rel={project.stageOnly ? undefined : "noreferrer"}
+              aria-label={project.stageOnly ? `Open ${project.title}` : `View repository: ${project.title}`}
               className={cx(
                 "inline-flex items-center gap-2 text-sm text-chalk-dim transition-colors duration-500 ease-apple-out",
                 t.groupText,
@@ -151,7 +154,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
                 "after:absolute after:inset-0 after:rounded-[1.75rem] after:content-['']"
               )}
             >
-              View repository
+              {project.stageOnly ? "Open the live page" : "View repository"}
               <ArrowUpRight />
             </a>
           </div>

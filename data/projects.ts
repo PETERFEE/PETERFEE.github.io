@@ -607,6 +607,32 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: "chicago-trip",
+    title: "Chicago, Four Days at Sunset",
+    tagline: "A vertical-timeline itinerary over a real-time 3D skyline whose sun follows the plan",
+    category: "Graphics / WebGL",
+    year: "2026",
+    repo: "https://github.com/PETERFEE/PETERFEE.github.io/tree/main/public/demos/chicago-trip",
+    demoEmbed: "/demos/chicago-trip/index.html",
+    stageOnly: true,
+    accent: "amber",
+    featured: false,
+    summary:
+      "A four-day Chicago trip told as one scroll. A procedural Three.js skyline sits behind a vertical timeline, and as each stop lights up, the sun moves to that hour: morning over Museum Campus, sunset at 360 CHICAGO, lit windows and fireworks over the lake on the last night.",
+    features: [],
+    stack: ["Three.js r128", "GLSL shaders", "CSS scroll-driven animations", "Canvas 2D particles", "JavaScript"],
+    media: [
+      {
+        file: "cover.jpg",
+        kind: "screenshot",
+        hint: "Hero frame of the pink sunset skyline",
+        alt: "A procedural 3D Chicago skyline at a pink sunset, reflected in Lake Michigan",
+        aspect: "16 / 10",
+        lead: true,
+      },
+    ],
+  },
+  {
     slug: "regression-sim",
     title: "Regression Sim",
     tagline: "A Python harness for running simulation regressions",

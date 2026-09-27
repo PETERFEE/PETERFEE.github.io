@@ -42,6 +42,11 @@ export interface Project {
    * dedicated page embeds it live in an iframe.
    */
   demoEmbed?: string;
+  /**
+   * The demo IS the project: its page shows only the embedded demo (no
+   * write-up underneath), and its card links straight to that page.
+   */
+  stageOnly?: boolean;
   summary: string;
   features: ProjectFeature[];
   metrics?: ProjectMetric[];
