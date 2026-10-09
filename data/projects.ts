@@ -608,7 +608,7 @@ export const projects: Project[] = [
   },
   {
     slug: "chicago-trip",
-    title: "Chicago, Four Days at Sunset",
+    title: "Chicago, Sunset",
     tagline: "A vertical-timeline itinerary over a real-time 3D skyline whose sun follows the plan",
     category: "Graphics / WebGL",
     year: "2026",
@@ -618,7 +618,7 @@ export const projects: Project[] = [
     accent: "amber",
     featured: false,
     summary:
-      "A four-day Chicago trip told as one scroll. A procedural Three.js skyline sits behind a vertical timeline, and as each stop lights up, the sun moves to that hour: morning over Museum Campus, sunset at 360 CHICAGO, lit windows and fireworks over the lake on the last night.",
+      "A Chicago trip told as one scroll. A procedural Three.js skyline sits behind a vertical timeline, and as each stop lights up, the sun moves to that hour: morning over Museum Campus, sunset at 360 CHICAGO, lit windows and fireworks over the lake on the last night.",
     features: [],
     stack: ["Three.js r128", "GLSL shaders", "CSS scroll-driven animations", "Canvas 2D particles", "JavaScript"],
     media: [
